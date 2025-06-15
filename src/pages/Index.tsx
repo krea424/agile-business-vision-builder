@@ -1,200 +1,51 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { FinancialPlanState } from '@/components/FinancialPlan/types';
-import { GeneralAssumptions } from '@/components/FinancialPlan/GeneralAssumptions';
-import { RecoverableClients } from '@/components/FinancialPlan/RecoverableClients';
-import { NewClients } from '@/components/FinancialPlan/NewClients';
-import { DirectlyAcquiredClients } from '@/components/FinancialPlan/DirectlyAcquiredClients';
-import { PersonnelCosts } from '@/components/FinancialPlan/PersonnelCosts';
-import { FixedCosts } from '@/components/FinancialPlan/FixedCosts';
-import { VariableCosts } from '@/components/FinancialPlan/VariableCosts';
-import { Investments } from '@/components/FinancialPlan/Investments';
-import { IncomeStatement } from '@/components/FinancialPlan/IncomeStatement';
-import { calculateFinancialSummary } from '@/components/FinancialPlan/financialCalculator';
-import { CashFlowStatement } from '@/components/FinancialPlan/CashFlowStatement';
-import { calculateCashFlowSummary } from '@/components/FinancialPlan/cashFlowCalculator';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Menu, Save } from "lucide-react";
 
-const initialPlanState: FinancialPlanState = {
-  general: {
-    companyName: 'Nome Azienda Esempio',
-    timeHorizon: 5,
-    startDate: 'set-25',
-    inflationRate: 3.0,
-    iresRate: 24.0,
-    irapRate: 3.9,
-    equityInjection: 100000,
-    daysToCollectReceivables: 60,
-    daysToPayPayables: 30,
-    // Campi aggiunti
-    scenarioName: 'Caso Base',
-    initialLoanAmount: 50000,
-    loanInterestRate: 5,
-    loanDurationMonths: 60,
-    minimumCashBuffer: 10000,
-    annualNewRevenueGrowthRate: 10,
-    customerChurnRate: 5,
-    averageVatRate: 22,
-    vatPaymentFrequency: 'Trimestrale',
-    dividendDistributionPolicy: 0,
-    dividendDistributionStartYear: 3,
-    terminalValueMethod: 'Multiplo EBITDA',
-    exitMultiple: 5,
-    wacc: 8,
-    currency: 'EUR',
-  },
-  recoverableClients: [
-    { id: '1', name: 'yardreaas', previousAnnualRevenue: 400000, recoveryProbability: 80, contractStartDateMonth: 3, serviceType: 'ricorrente', recoveryAmountPercentage: 30, annualIncreasePercentage: 0, contractDurationMonths: 24, renewalProbability: 50, activationRampUpMonths: 0, specificCollectionDays: 90 },
-  ],
-  newClients: [
-      { id: '1', channel: 'Commerciale', monthlyMarketingInvestment: 1000, leadsPer100Invested: 5, conversionRate: 10, averageAnnualContractValue: 15000, startMonth: 1 },
-  ],
-  directlyAcquiredClients: [],
-  personnelCosts: [
-    { id: '1', role: 'Founder & CEO', contractType: 'Compenso Amministratore', monthlyCost: 2000, hiringMonth: 1, annualSalaryIncrease: 5 },
-    { id: '2', role: 'Sviluppatore Senior', contractType: 'Dipendente', annualGrossSalary: 45000, companyCostCoefficient: 1.6, hiringMonth: 3, endMonth: 27, annualSalaryIncrease: 3, bonusType: '% su EBITDA', bonusValue: 2 },
-    { id: '3', role: 'Marketing Specialist', contractType: 'Freelance/P.IVA', monthlyCost: 1500, hiringMonth: 1 },
-  ],
-  fixedCosts: [
-    { id: '1', name: 'Affitto ufficio', monthlyCost: 1000, startMonth: 1, indexedToInflation: true, paymentFrequency: 'Mensile' },
-    { id: '2', name: 'Licenze Software', monthlyCost: 300, startMonth: 1, indexedToInflation: false, paymentFrequency: 'Annuale' },
-  ],
-  variableCosts: [
-    { id: '1', name: 'Commissioni su vendite dirette', calculationMethod: '% su Ricavi Specifici', value: 10, linkedRevenueChannel: 'direct' },
-    { id: '2', name: 'Costi piattaforma per contratto', calculationMethod: '€ per Contratto', value: 50 },
-  ],
-  initialInvestments: [
-    { id: '1', name: 'Costi di costituzione', cost: 2000, investmentMonth: 1, amortizationYears: 5, paymentMethod: 'Unica Soluzione' },
-    { id: '2', name: 'Sviluppo Piattaforma', cost: 15000, investmentMonth: 1, amortizationYears: 3, paymentMethod: 'Unica Soluzione' },
-    { id: '3', name: 'Rinnovo Hardware (Anno 3)', cost: 5000, investmentMonth: 25, amortizationYears: 3, paymentMethod: 'Rateizzato', installments: 10 },
-  ],
-};
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FinancialPlanState } from '@/components/FinancialPlan/types';
+import { ExecutiveDashboard } from '@/components/FinancialPlan/ExecutiveDashboard';
+import { Button } from '@/components/ui/button';
 
 const LOCAL_STORAGE_KEY = 'financial-plan-data';
 
 const Index = () => {
-  const [planData, setPlanData] = useState<FinancialPlanState>(() => {
-    if (typeof window === 'undefined') {
-      return initialPlanState;
-    }
+  const [planData, setPlanData] = useState<FinancialPlanState | null>(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
     try {
       const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (savedData) {
         const parsedData = JSON.parse(savedData);
-        // A simple check to ensure data is somewhat valid before using
         if (parsedData.general && parsedData.recoverableClients) {
-          return parsedData;
+          setPlanData(parsedData);
         }
       }
     } catch (error) {
       console.error("Error reading financial plan data from localStorage", error);
+    } finally {
+      setLoading(false);
     }
-    return initialPlanState;
-  });
+  }, []);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(planData));
-    }
-  }, [planData]);
-  
-  const [activeTab, setActiveTab] = useState('general');
-
-  const setGeneral = (data: FinancialPlanState['general']) => setPlanData(prev => ({...prev, general: data}));
-  const setRecoverableClients = (data: FinancialPlanState['recoverableClients']) => setPlanData(prev => ({...prev, recoverableClients: data}));
-  const setNewClients = (data: FinancialPlanState['newClients']) => setPlanData(prev => ({...prev, newClients: data}));
-  const setDirectlyAcquiredClients = (data: FinancialPlanState['directlyAcquiredClients']) => setPlanData(prev => ({...prev, directlyAcquiredClients: data}));
-  const setPersonnelCosts = (data: FinancialPlanState['personnelCosts']) => setPlanData(prev => ({...prev, personnelCosts: data}));
-  const setFixedCosts = (data: FinancialPlanState['fixedCosts']) => setPlanData(prev => ({...prev, fixedCosts: data}));
-  const setVariableCosts = (data: FinancialPlanState['variableCosts']) => setPlanData(prev => ({...prev, variableCosts: data}));
-  const setInitialInvestments = (data: FinancialPlanState['initialInvestments']) => setPlanData(prev => ({...prev, initialInvestments: data}));
-
-  const financialSummary = useMemo(() => {
-    try {
-      return calculateFinancialSummary(planData);
-    } catch (error) {
-      console.error("Error calculating financial summary:", error);
-      return [];
-    }
-  }, [planData]);
-
-  const cashFlowSummary = useMemo(() => {
-    try {
-      return calculateCashFlowSummary(planData, financialSummary);
-    } catch (error) {
-      console.error("Error calculating cash flow summary:", error);
-      return [];
-    }
-  }, [planData, financialSummary]);
-
-  const navigate = useNavigate();
-  const handleExport = () => navigate('/report', { state: { planData, financialSummary, cashFlowSummary } });
-
-  return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">
-      <div className="container mx-auto p-4 md:p-8 lg:p-12">
-        <header className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">Financial Sustainability Plan</h1>
-          <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">Simulatore di volo per testare le decisioni strategiche.</p>
-        </header>
-        
-        <div className="flex justify-between items-center mb-6">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Menu className="mr-2 h-4 w-4" /> Seleziona Sezione
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onSelect={() => setActiveTab('general')}>1. Generali</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveTab('revenues')}>2. Ricavi</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveTab('costs')}>3. Costi</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveTab('income')}>4. C. Economico</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveTab('cashflow')}>5. Flusso di Cassa</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button onClick={handleExport}>
-            <Save className="mr-2 h-4 w-4" /> Salva ed Esporta Scenario
-          </Button>
+  if (loading) {
+    return (
+        <div className="flex items-center justify-center h-screen">
+            <div className="text-xl">Caricamento dati...</div>
         </div>
+    );
+  }
+  
+  if (!planData) {
+    return (
+        <div className="flex flex-col items-center justify-center h-screen gap-4">
+            <div className="text-xl text-center">Nessun piano finanziario trovato.</div>
+            <Button onClick={() => navigate('/plan')}>Crea un nuovo piano</Button>
+        </div>
+    );
+  }
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsContent value="general">
-            <GeneralAssumptions data={planData.general} setData={setGeneral} />
-          </TabsContent>
-
-          <TabsContent value="revenues" className="space-y-6">
-            <RecoverableClients data={planData.recoverableClients} setData={setRecoverableClients} />
-            <NewClients data={planData.newClients} setData={setNewClients} />
-            <DirectlyAcquiredClients data={planData.directlyAcquiredClients} setData={setDirectlyAcquiredClients} />
-          </TabsContent>
-
-          <TabsContent value="costs" className="space-y-6">
-            <PersonnelCosts data={planData.personnelCosts} setData={setPersonnelCosts} />
-            <FixedCosts data={planData.fixedCosts} setData={setFixedCosts} />
-            <VariableCosts data={planData.variableCosts} setData={setVariableCosts} />
-            <Investments data={planData.initialInvestments} setData={setInitialInvestments} />
-          </TabsContent>
-
-          <TabsContent value="income">
-            <IncomeStatement data={financialSummary} />
-          </TabsContent>
-
-          <TabsContent value="cashflow">
-            <CashFlowStatement data={cashFlowSummary} />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  );
+  return <ExecutiveDashboard planData={planData} />;
 };
 
 export default Index;
