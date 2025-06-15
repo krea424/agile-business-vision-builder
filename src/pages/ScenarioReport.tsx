@@ -34,16 +34,29 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
     </Card>
 );
 
-const GeneralAssumptionsDisplay: React.FC<{ data: GeneralAssumptions }> = ({ data }) => (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+const GeneralAssumptionsDisplay: React.FC<{ data: GeneralAssumptions, formatCurrency: (value: number) => string }> = ({ data, formatCurrency }) => (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <p><strong>Scenario:</strong> {data.scenarioName}</p>
         <p><strong>Orizzonte Temporale:</strong> {data.timeHorizon} anni</p>
         <p><strong>Data Inizio:</strong> {data.startDate}</p>
         <p><strong>Tasso Inflazione:</strong> {formatPercentage(data.inflationRate)}</p>
         <p><strong>Aliquota IRES:</strong> {formatPercentage(data.iresRate)}</p>
         <p><strong>Aliquota IRAP:</strong> {formatPercentage(data.irapRate)}</p>
-        <p><strong>Iniezione Capitale:</strong> {formatCurrency(data.equityInjection)}</p>
-        <p><strong>Giorni Incasso Crediti:</strong> {data.daysToCollectReceivables}</p>
+        <p><strong>Aliquota IVA:</strong> {formatPercentage(data.averageVatRate)}</p>
+        <p><strong>Liquidazione IVA:</strong> {data.vatPaymentFrequency}</p>
+        <p><strong>Valuta:</strong> {data.currency}</p>
+        <p><strong>Capitale Proprio:</strong> {formatCurrency(data.equityInjection)}</p>
+        <p><strong>Finanziamento Iniziale:</strong> {formatCurrency(data.initialLoanAmount)}</p>
+        <p><strong>Tasso Interesse Fin.:</strong> {formatPercentage(data.loanInterestRate)}</p>
+        <p><strong>Durata Finanziamento:</strong> {data.loanDurationMonths} mesi</p>
+        <p><strong>Giorni Incasso Clienti:</strong> {data.daysToCollectReceivables}</p>
         <p><strong>Giorni Pagamento Fornitori:</strong> {data.daysToPayPayables}</p>
+        <p><strong>Cassa Minima:</strong> {formatCurrency(data.minimumCashBuffer)}</p>
+        <p><strong>Crescita Ricavi:</strong> {formatPercentage(data.annualNewRevenueGrowthRate)}</p>
+        <p><strong>Churn Rate:</strong> {formatPercentage(data.customerChurnRate)}</p>
+        <p><strong>Politica Dividendi:</strong> {`${formatPercentage(data.dividendDistributionPolicy)} dal ${data.dividendDistributionStartYear}° anno`}</p>
+        <p><strong>WACC:</strong> {formatPercentage(data.wacc)}</p>
+        <p><strong>Terminal Value:</strong> {`${data.terminalValueMethod}${data.terminalValueMethod === 'Multiplo EBITDA' ? ` (${data.exitMultiple}x)` : ''}`}</p>
     </div>
 );
 
@@ -51,6 +64,11 @@ const ScenarioReport = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { planData, financialSummary, cashFlowSummary } = location.state || {};
+
+    const formatCurrency = (value: number) => {
+        if (typeof value !== 'number' || isNaN(value)) return '';
+        return new Intl.NumberFormat('it-IT', { style: 'currency', currency: planData?.general?.currency || 'EUR' }).format(value);
+    };
 
     if (!planData) {
         return (
@@ -75,7 +93,7 @@ const ScenarioReport = () => {
                 </header>
 
                 <main>
-                    <Section title="1. Assunzioni Generali"><GeneralAssumptionsDisplay data={planData.general} /></Section>
+                    <Section title="1. Assunzioni Generali"><GeneralAssumptionsDisplay data={planData.general} formatCurrency={formatCurrency} /></Section>
                     
                     <Section title="2.1 Ricavi: Clienti da Recuperare">
                         <Table>
@@ -158,8 +176,8 @@ const ScenarioReport = () => {
                         </Table>
                     </Section>
 
-                    <Section title="4. Conto Economico Previsionale"><IncomeStatement data={financialSummary} /></Section>
-                    <Section title="5. Flusso di Cassa Previsionale"><CashFlowStatement data={cashFlowSummary} /></Section>
+                    <Section title="4. Conto Economico Previsionale"><IncomeStatement data={financialSummary} currency={planData.general.currency} /></Section>
+                    <Section title="5. Flusso di Cassa Previsionale"><CashFlowStatement data={cashFlowSummary} currency={planData.general.currency} /></Section>
                 </main>
             </div>
         </div>

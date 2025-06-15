@@ -1,3 +1,4 @@
+
 export interface GeneralAssumptions {
   companyName: string;
   timeHorizon: number;
@@ -8,6 +9,23 @@ export interface GeneralAssumptions {
   equityInjection: number;
   daysToCollectReceivables: number;
   daysToPayPayables: number;
+
+  // Campi aggiunti
+  scenarioName: string;
+  initialLoanAmount: number;
+  loanInterestRate: number;
+  loanDurationMonths: number;
+  minimumCashBuffer: number;
+  annualNewRevenueGrowthRate: number;
+  customerChurnRate: number;
+  averageVatRate: number;
+  vatPaymentFrequency: 'Mensile' | 'Trimestrale';
+  dividendDistributionPolicy: number;
+  dividendDistributionStartYear: number;
+  terminalValueMethod: 'Multiplo EBITDA' | 'Crescita Perpetua';
+  exitMultiple: number;
+  wacc: number;
+  currency: 'EUR' | 'USD' | 'GBP';
 }
 
 export interface RecoverableClient {
