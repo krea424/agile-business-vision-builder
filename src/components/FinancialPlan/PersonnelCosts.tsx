@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
@@ -87,6 +86,20 @@ export function PersonnelCosts({ data, setData }: Props) {
   
   const formatCurrency = (value: number) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(value);
 
+  const totals = data.reduce((acc, item) => {
+    let annualCompanyCost = 0;
+    if (item.contractType === 'Dipendente') {
+      annualCompanyCost = (item.annualGrossSalary || 0) * (item.companyCostCoefficient || 0);
+    } else if (item.contractType === 'Freelance/P.IVA' || item.contractType === 'Compenso Amministratore') {
+      annualCompanyCost = (item.monthlyCost || 0) * 12;
+    }
+    
+    acc.totalAnnualCost += annualCompanyCost;
+    acc.totalMonthlyCost += annualCompanyCost / 12;
+    
+    return acc;
+  }, { totalAnnualCost: 0, totalMonthlyCost: 0 });
+
   return (
     <Card>
       <CardHeader>
@@ -129,6 +142,12 @@ export function PersonnelCosts({ data, setData }: Props) {
               ))}
             </TableBody>
             <TableFooter>
+              <TableRow>
+                <TableCell colSpan={8} className="text-right font-bold">Totale</TableCell>
+                <TableCell className="text-right font-bold">{formatCurrency(totals.totalAnnualCost)}</TableCell>
+                <TableCell className="text-right font-bold">{formatCurrency(totals.totalMonthlyCost)}</TableCell>
+                <TableCell colSpan={3} />
+              </TableRow>
               <TableRow>
                   <TableCell colSpan={13}>
                       <Button variant="outline" size="sm" onClick={addRow}><PlusCircle className="h-4 w-4 mr-2" /> Aggiungi Ruolo</Button>
