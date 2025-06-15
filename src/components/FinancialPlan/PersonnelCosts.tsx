@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
@@ -60,13 +61,13 @@ export function PersonnelCosts({ data, setData }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[150px]">Ruolo</TableHead>
-              <TableHead className="min-w-[240px]">Stipendio Lordo Annuo (RAL)</TableHead>
-              <TableHead className="min-w-[150px]">Coeff. Costo Azienda</TableHead>
-              <TableHead className="min-w-[180px]">Mese Assunzione (da inizio progetto)</TableHead>
-              <TableHead className="min-w-[200px]">Costo Azienda Annuo</TableHead>
-              <TableHead className="min-w-[200px]">Costo Azienda Mese</TableHead>
-              <TableHead className="min-w-[200px]">Costo Effettivo Anno 1</TableHead>
+              <TableHead>Ruolo</TableHead>
+              <TableHead>RAL (€)</TableHead>
+              <TableHead>Coeff. Costo</TableHead>
+              <TableHead>Mese Assunzione</TableHead>
+              <TableHead>Costo Annuo</TableHead>
+              <TableHead>Costo Mese</TableHead>
+              <TableHead>Costo Anno 1</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
