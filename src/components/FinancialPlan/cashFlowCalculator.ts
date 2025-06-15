@@ -12,16 +12,32 @@ export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStateme
   const totalInvestment = initialInvestments.reduce((sum, item) => sum + item.cost, 0);
 
   let previousYearEndingCash = 0;
+  let previousYearAccountsReceivable = 0;
+  let previousYearAccountsPayable = 0;
 
   for (const yearData of incomeStatement) {
-    const { year, netProfit, amortization } = yearData;
+    const { year, netProfit, amortization, revenues, fixedCosts, variableCosts, marketingCosts } = yearData;
 
     // FLUSSO DI CASSA OPERATIVO LORDO
     const grossOperatingCashFlow = netProfit + amortization;
     
     // VARIAZIONE CAPITALE CIRCOLANTE
-    // As per user request, this is 0 for now.
-    const changeInWorkingCapital = 0;
+    // Calcolo dei crediti verso clienti per l'anno corrente
+    const currentAccountsReceivable = revenues * (general.daysToCollectReceivables / 365);
+    
+    // Calcolo dei debiti verso fornitori per l'anno corrente
+    // I costi verso fornitori includono costi fissi, variabili e di marketing
+    const supplierCosts = fixedCosts + variableCosts + marketingCosts;
+    const currentAccountsPayable = supplierCosts * (general.daysToPayPayables / 365);
+
+    // Variazione dei componenti del capitale circolante
+    const changeInReceivables = currentAccountsReceivable - previousYearAccountsReceivable;
+    const changeInPayables = currentAccountsPayable - previousYearAccountsPayable;
+    
+    // Un aumento dei crediti è un impiego di cassa (impatto negativo).
+    // Un aumento dei debiti è una fonte di cassa (impatto positivo).
+    const changeInWorkingCapital = changeInPayables - changeInReceivables;
+
 
     // FLUSSO DI CASSA DA ATTIVITÀ OPERATIVA (A)
     const cashFlowFromOperations = grossOperatingCashFlow + changeInWorkingCapital;
@@ -61,6 +77,8 @@ export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStateme
 
     // Update for next iteration
     previousYearEndingCash = endingCash;
+    previousYearAccountsReceivable = currentAccountsReceivable;
+    previousYearAccountsPayable = currentAccountsPayable;
   }
 
   return cashFlowSummary;
