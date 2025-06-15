@@ -42,7 +42,6 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
     let recoverableContractsThisYear = 0;
     recoverableClients.forEach(client => {
       let clientRevenueThisYear = 0;
-      let hasActivityThisYear = false;
       
       if (client.serviceType === 'una_tantum') {
         const annualPotentialRevenue = client.previousAnnualRevenue * (client.recoveryAmountPercentage / 100) * (client.recoveryProbability / 100);
@@ -97,9 +96,10 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
         }
       }
       recoverableRevenueThisYear += clientRevenueThisYear;
-      if(clientRevenueThisYear > 0) hasActivityThisYear = true;
-    }
-    if(hasActivityThisYear) recoverableContractsThisYear++;
+      if (clientRevenueThisYear > 0) {
+        recoverableContractsThisYear++;
+      }
+    });
     recurringRevenueFromNewClients *= (1 - (general.customerChurnRate || 0) / 100);
 
     let totalWeightedCollectionDaysNumerator = 0;

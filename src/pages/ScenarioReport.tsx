@@ -122,20 +122,35 @@ const ScenarioReport = () => {
                         <Table>
                             <TableHeader><TableRow>
                                 <TableHead>Ruolo</TableHead>
-                                <TableHead>Stipendio Netto Mensile</TableHead>
-                                <TableHead>Coeff. per RAL</TableHead>
-                                <TableHead>RAL</TableHead>
-                                <TableHead>Costo Azienda Annuo</TableHead>
-                                <TableHead>Costo Effettivo Anno 1</TableHead>
+                                <TableHead>Tipo Contratto</TableHead>
+                                <TableHead>Costo Annuo Base</TableHead>
+                                <TableHead>Dettagli</TableHead>
                             </TableRow></TableHeader>
-                            <TableBody>{planData.personnelCosts.map((c: PersonnelCost) => <TableRow key={c.id}>
-                                <TableCell>{c.role}</TableCell>
-                                <TableCell>{formatCurrency(c.netMonthlySalary || 0)}</TableCell>
-                                <TableCell>{new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 3 }).format(c.ralCoefficient || 0)}</TableCell>
-                                <TableCell>{formatCurrency(c.annualGrossSalary)}</TableCell>
-                                <TableCell>{formatCurrency(calculatePersonnelAnnualCost(c))}</TableCell>
-                                <TableCell>{formatCurrency(calculatePersonnelFirstYearCost(c))}</TableCell>
-                            </TableRow>)}</TableBody>
+                            <TableBody>{planData.personnelCosts.map((c: PersonnelCost) => {
+                                let annualCostText: string;
+                                let details = `Inizio: Mese ${c.hiringMonth}`;
+
+                                if (c.contractType === 'Dipendente') {
+                                    const annualCost = (c.annualGrossSalary || 0) * (c.companyCostCoefficient || 1);
+                                    annualCostText = formatCurrency(annualCost);
+                                    details += `, Aumento annuo: ${formatPercentage(c.annualSalaryIncrease || 0)}`;
+                                    if (c.bonusType && c.bonusType !== 'Nessuno') {
+                                        const bonusValueText = c.bonusType === 'Importo Fisso Annuo' ? formatCurrency(c.bonusValue || 0) : formatPercentage(c.bonusValue || 0);
+                                        details += `, Bonus: ${bonusValueText} ${c.bonusType}`;
+                                    }
+                                } else {
+                                    annualCostText = formatCurrency((c.monthlyCost || 0) * 12);
+                                }
+                                
+                                return (
+                                    <TableRow key={c.id}>
+                                        <TableCell>{c.role}</TableCell>
+                                        <TableCell>{c.contractType}</TableCell>
+                                        <TableCell>{annualCostText}</TableCell>
+                                        <TableCell className="text-sm text-muted-foreground">{details}</TableCell>
+                                    </TableRow>
+                                );
+                            })}</TableBody>
                         </Table>
                     </Section>
 
@@ -157,19 +172,40 @@ const ScenarioReport = () => {
                             </TableBody>
                         </Table>
                         <h4 className="font-bold mt-4 mb-2">Costi Variabili</h4>
-                        <Table><TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>% su Fatturato</TableHead></TableRow></TableHeader>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Nome</TableHead>
+                                    <TableHead>Metodo</TableHead>
+                                    <TableHead>Valore</TableHead>
+                                    <TableHead>Canale Ricavo</TableHead>
+                                </TableRow>
+                            </TableHeader>
                             <TableBody>
-                                {planData.variableCosts.map(c => (
-                                    <React.Fragment key={c.id}>
-                                        <TableRow>
-                                            <TableCell className="font-medium">{c.name}</TableCell>
-                                            <TableCell>{formatPercentage(c.subItems && c.subItems.length > 0 ? c.subItems.reduce((acc, si) => acc + si.percentageOnRevenue, 0) : c.percentageOnRevenue)}</TableCell>
-                                        </TableRow>
-                                        {c.subItems?.map(si => (
-                                            <TableRow key={si.id} className="bg-muted/50"><TableCell className="pl-8 text-muted-foreground">{si.name}</TableCell><TableCell>{formatPercentage(si.percentageOnRevenue)}</TableCell></TableRow>
-                                        ))}
-                                    </React.Fragment>
-                                ))}
+                                {planData.variableCosts.map((c: VariableCost) => {
+                                    const isCurrency = c.calculationMethod === '€ per Contratto';
+                                    const formatValue = (val: number) => isCurrency ? formatCurrency(val) : formatPercentage(val);
+                                    const totalValue = c.subItems && c.subItems.length > 0 ? c.subItems.reduce((acc, si) => acc + si.value, 0) : c.value;
+
+                                    return (
+                                        <React.Fragment key={c.id}>
+                                            <TableRow>
+                                                <TableCell className="font-medium">{c.name}</TableCell>
+                                                <TableCell>{c.calculationMethod}</TableCell>
+                                                <TableCell>{formatValue(totalValue)}</TableCell>
+                                                <TableCell>{c.calculationMethod === '% su Ricavi Specifici' ? c.linkedRevenueChannel : '---'}</TableCell>
+                                            </TableRow>
+                                            {c.subItems?.map(si => (
+                                                <TableRow key={si.id} className="bg-muted/50">
+                                                    <TableCell className="pl-8 text-muted-foreground">{si.name}</TableCell>
+                                                    <TableCell></TableCell>
+                                                    <TableCell>{formatValue(si.value)}</TableCell>
+                                                    <TableCell></TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </React.Fragment>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                         <h4 className="font-bold mt-4 mb-2">Investimenti Iniziali</h4>
