@@ -65,6 +65,7 @@ export function PersonnelCosts({ data, setData }: Props) {
               <TableHead className="min-w-[150px]">Coeff. Costo Azienda</TableHead>
               <TableHead className="min-w-[180px]">Mese Assunzione (da inizio progetto)</TableHead>
               <TableHead className="min-w-[200px]">Costo Azienda Annuo</TableHead>
+              <TableHead className="min-w-[200px]">Costo Azienda Mese</TableHead>
               <TableHead className="min-w-[200px]">Costo Effettivo Anno 1</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
@@ -72,6 +73,7 @@ export function PersonnelCosts({ data, setData }: Props) {
           <TableBody>
             {data.map((item, index) => {
               const annualCompanyCost = item.annualGrossSalary * item.companyCostCoefficient;
+              const monthlyCompanyCost = annualCompanyCost / 12;
               const hiringMonth = Number(item.hiringMonth || 1);
               let firstYearCost = 0;
               if (hiringMonth >= 1 && hiringMonth <= 12) {
@@ -86,6 +88,7 @@ export function PersonnelCosts({ data, setData }: Props) {
                 <TableCell><Input type="number" step="0.1" value={item.companyCostCoefficient} onChange={e => handleInputChange(index, 'companyCostCoefficient', Number(e.target.value))} className="text-right" /></TableCell>
                 <TableCell><Input type="number" value={item.hiringMonth} onChange={e => handleInputChange(index, 'hiringMonth', Number(e.target.value))} className="text-right" /></TableCell>
                 <TableCell className="text-right font-medium">{formatCurrency(annualCompanyCost)}</TableCell>
+                <TableCell className="text-right font-medium">{formatCurrency(monthlyCompanyCost)}</TableCell>
                 <TableCell className="text-right font-medium text-blue-600 dark:text-blue-400">{formatCurrency(firstYearCost)}</TableCell>
                 <TableCell><Button variant="ghost" size="icon" onClick={() => removeRow(item.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button></TableCell>
               </TableRow>
@@ -97,6 +100,7 @@ export function PersonnelCosts({ data, setData }: Props) {
                     <Button variant="outline" size="sm" onClick={addRow}><PlusCircle className="h-4 w-4 mr-2" /> Aggiungi Ruolo</Button>
                 </TableCell>
                 <TableCell className="text-right font-bold">{formatCurrency(totalCompanyCost)}</TableCell>
+                <TableCell></TableCell>
                 <TableCell className="text-right font-bold text-blue-600 dark:text-blue-400">{formatCurrency(totalFirstYearCost)}</TableCell>
                 <TableCell></TableCell>
             </TableRow>

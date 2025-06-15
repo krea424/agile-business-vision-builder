@@ -28,7 +28,7 @@ export function RecoverableClients({ data, setData }: Props) {
   };
 
   const addRow = () => {
-    setData([...data, { id: crypto.randomUUID(), name: '', previousAnnualRevenue: 0, recoveryProbability: 80, contractStartDateMonth: 1, serviceType: 'ricorrente', recoveryAmountPercentage: 30 }]);
+    setData([...data, { id: crypto.randomUUID(), name: '', previousAnnualRevenue: 0, recoveryProbability: 80, contractStartDateMonth: 1, serviceType: 'ricorrente', recoveryAmountPercentage: 30, annualIncreasePercentage: 0 }]);
   };
 
   const removeRow = (id: string) => {
@@ -62,6 +62,7 @@ export function RecoverableClients({ data, setData }: Props) {
               <TableHead>Prob. di Recupero %</TableHead>
               <TableHead>Mese Partenza Contratto (da inizio progetto)</TableHead>
               <TableHead>Tipo Servizio</TableHead>
+              <TableHead>% Incremento Annuo</TableHead>
               <TableHead>% Importo di Recupero</TableHead>
               <TableHead>Fatturato Recuperato Atteso</TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -85,6 +86,7 @@ export function RecoverableClients({ data, setData }: Props) {
                     </SelectContent>
                   </Select>
                 </TableCell>
+                <TableCell><Input type="number" value={item.annualIncreasePercentage || 0} onChange={e => handleInputChange(index, 'annualIncreasePercentage', Number(e.target.value))} className="text-right" /></TableCell>
                 <TableCell><Input type="number" value={item.recoveryAmountPercentage} onChange={e => handleInputChange(index, 'recoveryAmountPercentage', Number(e.target.value))} className="text-right" /></TableCell>
                 <TableCell className="text-right font-medium text-blue-600 dark:text-blue-400">{formatCurrency(expectedRecoveredRevenue)}</TableCell>
                 <TableCell><Button variant="ghost" size="icon" onClick={() => removeRow(item.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button></TableCell>
@@ -97,7 +99,7 @@ export function RecoverableClients({ data, setData }: Props) {
                     <Button variant="outline" size="sm" onClick={addRow}><PlusCircle className="h-4 w-4 mr-2" /> Aggiungi Cliente</Button>
                 </TableCell>
                 <TableCell className="text-right font-bold">{formatCurrency(totalPregresso)}</TableCell>
-                <TableCell colSpan={4}></TableCell>
+                <TableCell colSpan={5}></TableCell>
                 <TableCell className="text-right font-bold text-blue-600 dark:text-blue-400">{formatCurrency(totalExpectedRecoveredRevenue)}</TableCell>
                 <TableCell></TableCell>
             </TableRow>

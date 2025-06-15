@@ -1,4 +1,3 @@
-
 export interface GeneralAssumptions {
   companyName: string;
   timeHorizon: number;
@@ -19,6 +18,7 @@ export interface RecoverableClient {
   contractStartDateMonth: number;
   serviceType: 'ricorrente' | 'una_tantum';
   recoveryAmountPercentage: number;
+  annualIncreasePercentage: number;
 }
 
 export interface NewClientAcquisition {
@@ -66,6 +66,11 @@ export interface InitialInvestment {
   id: string;
   name: string;
   cost: number;
+  subItems?: {
+    id: string;
+    name: string;
+    cost: number;
+  }[];
 }
 
 export interface FinancialPlanState {
