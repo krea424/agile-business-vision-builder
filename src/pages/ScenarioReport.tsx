@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -110,11 +109,53 @@ const ScenarioReport = () => {
 
                     <Section title="3.2 Costi e Investimenti Operativi">
                         <h4 className="font-bold mt-4 mb-2">Costi Fissi</h4>
-                        <Table><TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Costo Mensile</TableHead></TableRow></TableHeader><TableBody>{planData.fixedCosts.map(c => <TableRow key={c.id}><TableCell>{c.name}</TableCell><TableCell>{formatCurrency(c.monthlyCost)}</TableCell></TableRow>)}</TableBody></Table>
+                        <Table><TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Costo Mensile</TableHead></TableRow></TableHeader>
+                            <TableBody>
+                                {planData.fixedCosts.map(c => (
+                                    <React.Fragment key={c.id}>
+                                        <TableRow>
+                                            <TableCell className="font-medium">{c.name}</TableCell>
+                                            <TableCell>{formatCurrency(c.subItems && c.subItems.length > 0 ? c.subItems.reduce((acc, si) => acc + si.monthlyCost, 0) : c.monthlyCost)}</TableCell>
+                                        </TableRow>
+                                        {c.subItems?.map(si => (
+                                            <TableRow key={si.id} className="bg-muted/50"><TableCell className="pl-8 text-muted-foreground">{si.name}</TableCell><TableCell>{formatCurrency(si.monthlyCost)}</TableCell></TableRow>
+                                        ))}
+                                    </React.Fragment>
+                                ))}
+                            </TableBody>
+                        </Table>
                         <h4 className="font-bold mt-4 mb-2">Costi Variabili</h4>
-                        <Table><TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>% su Fatturato</TableHead></TableRow></TableHeader><TableBody>{planData.variableCosts.map(c => <TableRow key={c.id}><TableCell>{c.name}</TableCell><TableCell>{formatPercentage(c.percentageOnRevenue)}</TableCell></TableRow>)}</TableBody></Table>
+                        <Table><TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>% su Fatturato</TableHead></TableRow></TableHeader>
+                            <TableBody>
+                                {planData.variableCosts.map(c => (
+                                    <React.Fragment key={c.id}>
+                                        <TableRow>
+                                            <TableCell className="font-medium">{c.name}</TableCell>
+                                            <TableCell>{formatPercentage(c.subItems && c.subItems.length > 0 ? c.subItems.reduce((acc, si) => acc + si.percentageOnRevenue, 0) : c.percentageOnRevenue)}</TableCell>
+                                        </TableRow>
+                                        {c.subItems?.map(si => (
+                                            <TableRow key={si.id} className="bg-muted/50"><TableCell className="pl-8 text-muted-foreground">{si.name}</TableCell><TableCell>{formatPercentage(si.percentageOnRevenue)}</TableCell></TableRow>
+                                        ))}
+                                    </React.Fragment>
+                                ))}
+                            </TableBody>
+                        </Table>
                         <h4 className="font-bold mt-4 mb-2">Investimenti Iniziali</h4>
-                        <Table><TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Costo</TableHead></TableRow></TableHeader><TableBody>{planData.initialInvestments.map(c => <TableRow key={c.id}><TableCell>{c.name}</TableCell><TableCell>{formatCurrency(c.cost)}</TableCell></TableRow>)}</TableBody></Table>
+                        <Table><TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Costo</TableHead></TableRow></TableHeader>
+                            <TableBody>
+                                {planData.initialInvestments.map(c => (
+                                    <React.Fragment key={c.id}>
+                                        <TableRow>
+                                            <TableCell className="font-medium">{c.name}</TableCell>
+                                            <TableCell>{formatCurrency(c.subItems && c.subItems.length > 0 ? c.subItems.reduce((acc, si) => acc + si.cost, 0) : c.cost)}</TableCell>
+                                        </TableRow>
+                                        {c.subItems?.map(si => (
+                                            <TableRow key={si.id} className="bg-muted/50"><TableCell className="pl-8 text-muted-foreground">{si.name}</TableCell><TableCell>{formatCurrency(si.cost)}</TableCell></TableRow>
+                                        ))}
+                                    </React.Fragment>
+                                ))}
+                            </TableBody>
+                        </Table>
                     </Section>
 
                     <Section title="4. Conto Economico Previsionale"><IncomeStatement data={financialSummary} /></Section>

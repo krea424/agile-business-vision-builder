@@ -54,12 +54,22 @@ export interface FixedCost {
   name: string;
   monthlyCost: number;
   startMonth: number;
+  subItems?: {
+    id: string;
+    name: string;
+    monthlyCost: number;
+  }[];
 }
 
 export interface VariableCost {
   id: string;
   name: string;
   percentageOnRevenue: number;
+  subItems?: {
+    id: string;
+    name: string;
+    percentageOnRevenue: number;
+  }[];
 }
 
 export interface InitialInvestment {

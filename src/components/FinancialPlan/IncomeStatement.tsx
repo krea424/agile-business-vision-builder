@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -108,15 +107,10 @@ export function IncomeStatement({ data }: Props) {
                     <TableCell className={row.isBold ? 'font-semibold text-gray-800 dark:text-gray-100' : ''}>{row.label}</TableCell>
                     {data.map(yearData => {
                       const value = yearData[row.key] as number;
-                      const coloredRows = ['recoverableClientRevenues', 'newClientRevenues', 'revenues', 'ebitda', 'ebit', 'netProfit'];
                       let colorClass = '';
 
-                      if (coloredRows.includes(row.key) && typeof value === 'number') {
-                        if (value > 0) {
-                          colorClass = 'text-green-600';
-                        } else if (value < 0) {
-                          colorClass = 'text-red-600';
-                        }
+                      if (typeof value === 'number' && value < 0) {
+                        colorClass = 'text-red-600';
                       }
                       
                       return (
