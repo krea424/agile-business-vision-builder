@@ -71,6 +71,8 @@ export interface PersonnelCost {
   endMonth?: number;
 
   // For 'Dipendente'
+  monthlyNetSalary?: number;
+  ralCoefficient?: number;
   annualGrossSalary?: number;
   companyCostCoefficient?: number;
   annualSalaryIncrease?: number;
