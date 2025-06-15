@@ -1,3 +1,4 @@
+
 import { FinancialPlanState, YearlyData, CashFlowYearlyData } from './types';
 
 export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStatement: YearlyData[]): CashFlowYearlyData[] {
@@ -7,13 +8,6 @@ export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStateme
 
   const { general, initialInvestments } = plan;
   const cashFlowSummary: CashFlowYearlyData[] = [];
-
-  const totalInvestment = initialInvestments.reduce((total, item) => {
-    const itemCost = item.subItems && item.subItems.length > 0
-      ? item.subItems.reduce((sum, sub) => sum + sub.cost, 0)
-      : item.cost;
-    return total + itemCost;
-  }, 0);
 
   let previousYearEndingCash = 0;
   let previousYearAccountsReceivable = 0;
@@ -48,7 +42,17 @@ export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStateme
     const cashFlowFromOperations = grossOperatingCashFlow + changeInWorkingCapital;
 
     // FLUSSO DI CASSA DA ATTIVITÀ DI INVESTIMENTO (B)
-    const capex = (year === 1) ? -totalInvestment : 0;
+    const capexForYear = initialInvestments.reduce((total, item) => {
+        const investmentYear = Math.ceil(item.investmentMonth / 12);
+        if (investmentYear === year) {
+            const itemCost = item.subItems && item.subItems.length > 0
+                ? item.subItems.reduce((sum, sub) => sum + sub.cost, 0)
+                : item.cost;
+            return total + itemCost;
+        }
+        return total;
+    }, 0);
+    const capex = -capexForYear; // Cash outflow
     const cashFlowFromInvesting = capex;
     
     // FLUSSO DI CASSA DA ATTIVITÀ FINANZIARIA (C)

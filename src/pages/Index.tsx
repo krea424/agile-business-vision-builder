@@ -7,7 +7,9 @@ import { RecoverableClients } from '@/components/FinancialPlan/RecoverableClient
 import { NewClients } from '@/components/FinancialPlan/NewClients';
 import { DirectlyAcquiredClients } from '@/components/FinancialPlan/DirectlyAcquiredClients';
 import { PersonnelCosts } from '@/components/FinancialPlan/PersonnelCosts';
-import { OperationalInvestments } from '@/components/FinancialPlan/OperationalInvestments';
+import { FixedCosts } from '@/components/FinancialPlan/FixedCosts';
+import { VariableCosts } from '@/components/FinancialPlan/VariableCosts';
+import { Investments } from '@/components/FinancialPlan/Investments';
 import { IncomeStatement } from '@/components/FinancialPlan/IncomeStatement';
 import { calculateFinancialSummary } from '@/components/FinancialPlan/financialCalculator';
 import { CashFlowStatement } from '@/components/FinancialPlan/CashFlowStatement';
@@ -57,29 +59,22 @@ const initialPlanState: FinancialPlanState = {
   ],
   directlyAcquiredClients: [],
   personnelCosts: [
-    { id: '1', role: 'Visurista Esperto 1', netMonthlySalary: 1600, ralCoefficient: 17.375, annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
-    { id: '2', role: 'Visurista Esperto 2', netMonthlySalary: 1600, ralCoefficient: 17.375, annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
-    { id: '3', role: 'Visurista Esperto 3', netMonthlySalary: 1600, ralCoefficient: 17.375, annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
-    { id: '4', role: 'Visurista Esperto 4', netMonthlySalary: 1600, ralCoefficient: 17.375, annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 4 },
-    { id: '5', role: 'Amministrativo', netMonthlySalary: 1600, ralCoefficient: 17.375, annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
-    { id: '6', role: 'Direttore Operativo (Founder)', netMonthlySalary: 1200, ralCoefficient: 15, annualGrossSalary: 18000, companyCostCoefficient: 1.0, hiringMonth: 7 },
-    { id: '7', role: 'Commerciale (Founder)', netMonthlySalary: 1200, ralCoefficient: 15, annualGrossSalary: 18000, companyCostCoefficient: 1.0, hiringMonth: 7 },
+    { id: '1', role: 'Founder & CEO', contractType: 'Compenso Amministratore', monthlyCost: 2000, hiringMonth: 1, annualSalaryIncrease: 5 },
+    { id: '2', role: 'Sviluppatore Senior', contractType: 'Dipendente', annualGrossSalary: 45000, companyCostCoefficient: 1.6, hiringMonth: 3, endMonth: 27, annualSalaryIncrease: 3, bonusType: '% su EBITDA', bonusValue: 2 },
+    { id: '3', role: 'Marketing Specialist', contractType: 'Freelance/P.IVA', monthlyCost: 1500, hiringMonth: 1 },
   ],
   fixedCosts: [
-    { id: '1', name: 'Affitto ufficio', monthlyCost: 1000, startMonth: 1 },
-    { id: '2', name: 'Utenze', monthlyCost: 300, startMonth: 1 },
-    { id: '3', name: 'Servizio Cloud', monthlyCost: 300, startMonth: 1 },
-    { id: '4', name: 'Licenze Software', monthlyCost: 300, startMonth: 1 },
-    { id: '5', name: 'Commercialista', monthlyCost: 250, startMonth: 1 },
-    { id: '6', name: 'Consulente del Lavoro', monthlyCost: 150, startMonth: 1 },
+    { id: '1', name: 'Affitto ufficio', monthlyCost: 1000, startMonth: 1, indexedToInflation: true, paymentFrequency: 'Mensile' },
+    { id: '2', name: 'Licenze Software', monthlyCost: 300, startMonth: 1, indexedToInflation: false, paymentFrequency: 'Annuale' },
   ],
-  variableCosts: [],
+  variableCosts: [
+    { id: '1', name: 'Commissioni su vendite dirette', calculationMethod: '% su Ricavi Specifici', value: 10, linkedRevenueChannel: 'direct' },
+    { id: '2', name: 'Costi piattaforma per contratto', calculationMethod: '€ per Contratto', value: 50 },
+  ],
   initialInvestments: [
-    { id: '1', name: 'Costi di costituzione', cost: 2000 },
-    { id: '2', name: 'Sviluppo sito web', cost: 2000 },
-    { id: '3', name: 'Arredo', cost: 2000 },
-    { id: '4', name: 'Computer', cost: 2000 },
-    { id: '5', name: 'Deposito cauzione ufficio', cost: 2000 },
+    { id: '1', name: 'Costi di costituzione', cost: 2000, investmentMonth: 1, amortizationYears: 5, paymentMethod: 'Unica Soluzione' },
+    { id: '2', name: 'Sviluppo Piattaforma', cost: 15000, investmentMonth: 1, amortizationYears: 3, paymentMethod: 'Unica Soluzione' },
+    { id: '3', name: 'Rinnovo Hardware (Anno 3)', cost: 5000, investmentMonth: 25, amortizationYears: 3, paymentMethod: 'Rateizzato', installments: 10 },
   ],
 };
 
@@ -184,14 +179,9 @@ const Index = () => {
 
           <TabsContent value="costs" className="space-y-6">
             <PersonnelCosts data={planData.personnelCosts} setData={setPersonnelCosts} />
-            <OperationalInvestments 
-                fixedCosts={planData.fixedCosts}
-                variableCosts={planData.variableCosts}
-                initialInvestments={planData.initialInvestments}
-                setFixedCosts={setFixedCosts}
-                setVariableCosts={setVariableCosts}
-                setInitialInvestments={setInitialInvestments}
-            />
+            <FixedCosts data={planData.fixedCosts} setData={setFixedCosts} />
+            <VariableCosts data={planData.variableCosts} setData={setVariableCosts} />
+            <Investments data={planData.initialInvestments} setData={setInitialInvestments} />
           </TabsContent>
 
           <TabsContent value="income">

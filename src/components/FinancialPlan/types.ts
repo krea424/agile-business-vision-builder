@@ -1,3 +1,4 @@
+
 export interface GeneralAssumptions {
   companyName: string;
   timeHorizon: number;
@@ -65,11 +66,19 @@ export interface DirectlyAcquiredClient {
 export interface PersonnelCost {
   id: string;
   role: string;
-  netMonthlySalary: number;
-  ralCoefficient: number;
-  annualGrossSalary: number;
-  companyCostCoefficient: number;
+  contractType: 'Dipendente' | 'Freelance/P.IVA' | 'Compenso Amministratore';
   hiringMonth: number;
+  endMonth?: number;
+
+  // For 'Dipendente'
+  annualGrossSalary?: number;
+  companyCostCoefficient?: number;
+  annualSalaryIncrease?: number;
+  bonusType?: 'Nessuno' | '% su EBITDA' | '% su Utile Netto' | 'Importo Fisso Annuo';
+  bonusValue?: number;
+
+  // For 'Freelance/P.IVA' & 'Compenso Amministratore'
+  monthlyCost?: number;
 }
 
 export interface FixedCost {
@@ -77,6 +86,8 @@ export interface FixedCost {
   name: string;
   monthlyCost: number;
   startMonth: number;
+  indexedToInflation: boolean;
+  paymentFrequency: 'Mensile' | 'Trimestrale' | 'Semestrale' | 'Annuale';
   subItems?: {
     id: string;
     name: string;
@@ -87,11 +98,13 @@ export interface FixedCost {
 export interface VariableCost {
   id: string;
   name: string;
-  percentageOnRevenue: number;
+  calculationMethod: '% su Ricavi Totali' | '% su Ricavi Specifici' | '€ per Contratto';
+  value: number;
+  linkedRevenueChannel?: 'recoverable' | 'new' | 'direct';
   subItems?: {
     id: string;
     name: string;
-    percentageOnRevenue: number;
+    value: number; // Changed from percentageOnRevenue
   }[];
 }
 
@@ -99,6 +112,10 @@ export interface InitialInvestment {
   id: string;
   name: string;
   cost: number;
+  investmentMonth: number;
+  amortizationYears: number;
+  paymentMethod: 'Unica Soluzione' | 'Rateizzato';
+  installments?: number;
   subItems?: {
     id: string;
     name: string;
