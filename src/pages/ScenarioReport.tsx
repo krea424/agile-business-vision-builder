@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { IncomeStatement } from '@/components/FinancialPlan/IncomeStatement';
 import { CashFlowStatement } from '@/components/FinancialPlan/CashFlowStatement';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend, Bar, Line } from 'recharts';
+import { ComposedChart, XAxis, YAxis, CartesianGrid, Bar, Line } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
 
 const formatCurrency = (value: number) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(value);
 const formatPercentage = (value: number) => new Intl.NumberFormat('it-IT', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value / 100);
@@ -29,6 +30,21 @@ const calculateDirectClientRevenue = (item: DirectlyAcquiredClient): number => {
 
 const calculatePersonnelAnnualCost = (item: PersonnelCost): number => item.annualGrossSalary * item.companyCostCoefficient;
 const calculatePersonnelFirstYearCost = (item: PersonnelCost): number => (calculatePersonnelAnnualCost(item) / 12) * (13 - item.hiringMonth);
+
+const chartConfig = {
+  Ricavi: {
+    label: 'Ricavi',
+    color: 'hsl(var(--chart-revenue))',
+  },
+  EBITDA: {
+    label: 'EBITDA',
+    color: 'hsl(var(--chart-ebitda))',
+  },
+  "Cassa Finale": {
+    label: 'Cassa Finale',
+    color: 'hsl(var(--chart-cash))',
+  },
+} satisfies ChartConfig;
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <Card className="mb-6 break-inside-avoid">
@@ -106,19 +122,40 @@ const DashboardDisplay: React.FC<{ data: any, planData: FinancialPlanState }> = 
             <div>
                 <h3 className="text-lg font-semibold mb-2">Andamento Economico e Finanziario</h3>
                 <div className="h-[400px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart data={monthlyChartData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis yAxisId="left" stroke="#8884d8" tickFormatter={(value) => formatCurrencyForChart(value).replace('€', '€ ')} />
-                            <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" tickFormatter={(value) => formatCurrencyForChart(value).replace('€', '€ ')} />
-                            <Tooltip formatter={(value: number) => formatCurrencyForChart(value)} />
-                            <Legend />
-                            <Bar dataKey="Ricavi" yAxisId="left" fill="#8884d8" name="Ricavi" />
-                            <Line type="monotone" dataKey="EBITDA" yAxisId="left" stroke="#ff7300" name="EBITDA" />
-                            <Line type="monotone" dataKey="Cassa Finale" yAxisId="right" stroke="#82ca9d" name="Cassa Finale" />
+                    <ChartContainer config={chartConfig} className="h-[400px] w-full">
+                        <ComposedChart data={monthlyChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="name"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                            />
+                            <YAxis
+                              yAxisId="left"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              tickFormatter={(value) => formatCurrencyForChart(value as number).replace(/€\s/g, '').replace(/\./g, '').slice(0, -3) + 'k'}
+                            />
+                            <YAxis
+                              yAxisId="right"
+                              orientation="right"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              tickFormatter={(value) => formatCurrencyForChart(value as number).replace(/€\s/g, '').replace(/\./g, '').slice(0, -3) + 'k'}
+                            />
+                            <ChartTooltip
+                              cursor={false}
+                              content={<ChartTooltipContent indicator="dot" />}
+                            />
+                            <ChartLegend content={<ChartLegendContent />} />
+                            <Bar dataKey="Ricavi" yAxisId="left" fill="var(--color-Ricavi)" radius={4} />
+                            <Line type="monotone" dataKey="EBITDA" yAxisId="left" stroke="var(--color-EBITDA)" strokeWidth={2} dot={{ r: 4, fill: "var(--color-EBITDA)" }} activeDot={{r: 6}} />
+                            <Line type="monotone" dataKey="Cassa Finale" yAxisId="right" stroke="var(--color-Cassa Finale)" strokeWidth={2} dot={{ r: 4, fill: "var(--color-Cassa Finale)" }} activeDot={{r: 6}} />
                         </ComposedChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </div>
             </div>
         </div>

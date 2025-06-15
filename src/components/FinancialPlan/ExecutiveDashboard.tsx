@@ -7,7 +7,8 @@ import { calculateCashFlowSummary } from '@/components/FinancialPlan/cashFlowCal
 import { calculateDashboardData, Insight, DashboardData } from './dashboardCalculator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend, Bar, Line } from 'recharts';
+import { ComposedChart, XAxis, YAxis, CartesianGrid, Bar, Line } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
 import { Edit, Banknote, Landmark, AlertTriangle, ArrowDown, CalendarCheck, Percent, Target, Info, BarChart } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -36,6 +37,21 @@ const formatCurrency = (value: number | undefined) => {
   return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
 }
 
+const chartConfig = {
+  Ricavi: {
+    label: 'Ricavi',
+    color: 'hsl(var(--chart-revenue))',
+  },
+  EBITDA: {
+    label: 'EBITDA',
+    color: 'hsl(var(--chart-ebitda))',
+  },
+  "Cassa Finale": {
+    label: 'Cassa Finale',
+    color: 'hsl(var(--chart-cash))',
+  },
+} satisfies ChartConfig;
+
 export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState }) => {
   const navigate = useNavigate();
 
@@ -46,9 +62,9 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
   const { kpis, monthlyChartData, automatedInsights } = dashboardData;
 
   // Type guard to ensure KPIs are loaded
-  if (!('peakFundingRequirement' in kpis)) {
+  if (!kpis || !('peakFundingRequirement' in kpis)) {
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">
+        <div className="min-h-screen w-full flex items-center justify-center bg-muted/40">
             <Card>
                 <CardHeader>
                     <CardTitle>Dati non disponibili</CardTitle>
@@ -62,7 +78,7 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">
+    <div className="min-h-screen w-full bg-muted/40">
       <div className="container mx-auto p-4 md:p-8 lg:p-12">
         <header className="flex justify-between items-center mb-12">
           <div>
@@ -110,20 +126,41 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
             <CardHeader>
                 <CardTitle>Andamento Economico e Finanziario</CardTitle>
             </CardHeader>
-            <CardContent className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={monthlyChartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis yAxisId="left" stroke="#8884d8" tickFormatter={(value) => formatCurrency(value).replace('€', '€ ')} />
-                        <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" tickFormatter={(value) => formatCurrency(value).replace('€', '€ ')} />
-                        <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                        <Legend />
-                        <Bar dataKey="Ricavi" yAxisId="left" fill="#8884d8" name="Ricavi" />
-                        <Line type="monotone" dataKey="EBITDA" yAxisId="left" stroke="#ff7300" name="EBITDA" />
-                        <Line type="monotone" dataKey="Cassa Finale" yAxisId="right" stroke="#82ca9d" name="Cassa Finale" />
+            <CardContent>
+                <ChartContainer config={chartConfig} className="h-[400px] w-full">
+                    <ComposedChart data={monthlyChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="name"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <YAxis
+                          yAxisId="left"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tickFormatter={(value) => formatCurrency(value as number).replace(/€\s/g, '').replace(/\./g, '').slice(0, -3) + 'k'}
+                        />
+                        <YAxis
+                          yAxisId="right"
+                          orientation="right"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tickFormatter={(value) => formatCurrency(value as number).replace(/€\s/g, '').replace(/\./g, '').slice(0, -3) + 'k'}
+                        />
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent indicator="dot" />}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                        <Bar dataKey="Ricavi" yAxisId="left" fill="var(--color-Ricavi)" radius={4} />
+                        <Line type="monotone" dataKey="EBITDA" yAxisId="left" stroke="var(--color-EBITDA)" strokeWidth={2} dot={{ r: 4, fill: "var(--color-EBITDA)" }} activeDot={{r: 6}} />
+                        <Line type="monotone" dataKey="Cassa Finale" yAxisId="right" stroke="var(--color-Cassa Finale)" strokeWidth={2} dot={{ r: 4, fill: "var(--color-Cassa Finale)" }} activeDot={{r: 6}} />
                     </ComposedChart>
-                </ResponsiveContainer>
+                </ChartContainer>
             </CardContent>
         </Card>
       </div>
