@@ -21,11 +21,11 @@ const formatCurrency = (value: number) => new Intl.NumberFormat('it-IT', { style
 const chartConfig = {
   revenues: {
     label: "Ricavi",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--primary))",
   },
   netProfit: {
     label: "Utile Netto",
-    color: "hsl(var(--chart-2))",
+    color: "#10b981",
   },
 };
 
