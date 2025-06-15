@@ -253,6 +253,11 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
 
     const principalPaymentThisYear = (year * 12 <= general.loanDurationMonths && outstandingLoanBalance > 0) ? Math.min(annualPrincipalPayment, outstandingLoanBalance) : 0;
     outstandingLoanBalance -= principalPaymentThisYear;
+    
+    const contributionMarginPercentage = totalRevenues > 0 ? ((totalRevenues - variableCostsThisYear) / totalRevenues) * 100 : 0;
+    const ebitdaMargin = totalRevenues > 0 ? (ebitda / totalRevenues) * 100 : 0;
+    const ebitMargin = totalRevenues > 0 ? (ebit / totalRevenues) * 100 : 0;
+    const netProfitMargin = totalRevenues > 0 ? (netProfit / totalRevenues) * 100 : 0;
 
     summary.push({
       year,
@@ -273,6 +278,10 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
       netProfit,
       loanPrincipalRepayment: principalPaymentThisYear,
       weightedAverageCollectionDays,
+      contributionMarginPercentage,
+      ebitdaMargin,
+      ebitMargin,
+      netProfitMargin,
     });
   }
   

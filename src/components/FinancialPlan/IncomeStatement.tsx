@@ -41,24 +41,29 @@ export function IncomeStatement({ data, currency = 'EUR' }: Props) {
   }
 
   const formatCurrency = (value: number) => new Intl.NumberFormat('it-IT', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+  const formatPercentage = (value: number) => new Intl.NumberFormat('it-IT', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value / 100);
 
   const tableHeaders = ["Voce", ...data.map(d => `Anno ${d.year}`)];
-  const rows: { label: string; key: keyof YearlyData; isBold?: boolean; isHighlighted?: boolean }[] = [
-    { label: "Ricavi da Clienti Recuperati", key: 'recoverableClientRevenues' },
-    { label: "Ricavi da Nuovi Clienti (Marketing)", key: 'newClientRevenues' },
-    { label: "Ricavi da Clienti Diretti", key: 'directlyAcquiredClientRevenues' },
+  const rows: { label: string; key: string; isBold?: boolean; isHighlighted?: boolean; isPercentage?: boolean; isSubtle?: boolean; }[] = [
+    { label: "Ricavi da Clienti Recuperati", key: 'recoverableClientRevenues', isSubtle: true },
+    { label: "Ricavi da Nuovi Clienti (Marketing)", key: 'newClientRevenues', isSubtle: true },
+    { label: "Ricavi da Clienti Diretti", key: 'directlyAcquiredClientRevenues', isSubtle: true },
     { label: "Ricavi Totali", key: 'revenues', isBold: true },
+    { label: "Costi Variabili", key: 'variableCosts' },
+    { label: "Margine di Contribuzione (%)", key: 'contributionMarginPercentage', isPercentage: true, isBold: true },
     { label: "Costi del Personale", key: 'personnelCosts' },
     { label: "Costi Fissi Operativi", key: 'fixedCosts' },
     { label: "Costi di Marketing", key: 'marketingCosts' },
-    { label: "Costi Variabili", key: 'variableCosts' },
     { label: "EBITDA", key: 'ebitda', isBold: true },
+    { label: "EBITDA Margin (%)", key: 'ebitdaMargin', isPercentage: true },
     { label: "Ammortamenti", key: 'amortization' },
     { label: "EBIT (Utile Operativo)", key: 'ebit', isBold: true },
+    { label: "EBIT Margin (%)", key: 'ebitMargin', isPercentage: true },
     { label: "(-) Oneri Finanziari", key: 'interestExpense' },
     { label: "Utile ante imposte (EBT)", key: 'ebt', isBold: true },
     { label: "Imposte (IRES + IRAP)", key: 'taxes' },
     { label: "Utile Netto", key: 'netProfit', isBold: true, isHighlighted: true },
+    { label: "Net Profit Margin (%)", key: 'netProfitMargin', isPercentage: true, isHighlighted: true },
   ];
 
   return (
@@ -86,7 +91,12 @@ export function IncomeStatement({ data, currency = 'EUR' }: Props) {
               <ChartTooltip
                 cursor={false}
                 content={<ChartTooltipContent
-                    formatter={(value) => formatCurrency(value as number)}
+                    formatter={(value, name) => {
+                      if (name === 'netProfit' || name === 'revenues') {
+                        return formatCurrency(value as number);
+                      }
+                      return value;
+                    }}
                     indicator="dot"
                 />}
               />
@@ -108,18 +118,20 @@ export function IncomeStatement({ data, currency = 'EUR' }: Props) {
               <TableBody>
                 {rows.map(row => (
                   <TableRow key={row.label} className={row.isHighlighted ? 'bg-green-50 dark:bg-green-900/20' : ''}>
-                    <TableCell className={row.isBold ? 'font-semibold text-gray-800 dark:text-gray-100' : ''}>{row.label}</TableCell>
+                    <TableCell className={`${row.isBold ? 'font-semibold text-gray-800 dark:text-gray-100' : ''} ${row.isSubtle ? 'pl-8 text-sm text-muted-foreground' : ''}`}>
+                      {row.label}
+                    </TableCell>
                     {data.map(yearData => {
                       const value = yearData[row.key] as number;
                       let colorClass = '';
 
-                      if (typeof value === 'number' && value < 0) {
+                      if (typeof value === 'number' && value < 0 && !row.isPercentage) {
                         colorClass = 'text-red-600';
                       }
                       
                       return (
                         <TableCell key={yearData.year} className={`text-right tabular-nums ${row.isBold ? 'font-semibold text-gray-800 dark:text-gray-100' : ''} ${colorClass}`}>
-                          {formatCurrency(value)}
+                          {row.isPercentage ? formatPercentage(value) : formatCurrency(value)}
                         </TableCell>
                       );
                     })}
