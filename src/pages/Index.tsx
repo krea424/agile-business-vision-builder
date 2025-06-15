@@ -23,6 +23,7 @@ import { Menu, Save } from "lucide-react";
 
 const initialPlanState: FinancialPlanState = {
   general: {
+    companyName: 'Nome Azienda Esempio',
     timeHorizon: 5,
     startDate: 'set-25',
     inflationRate: 3.0,

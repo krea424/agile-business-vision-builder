@@ -62,6 +62,10 @@ export function GeneralAssumptions({ data, setData }: Props) {
         <CardTitle>Ipotesi Generali</CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="space-y-2 md:col-span-2 lg:col-span-4">
+          <Label htmlFor="companyName">Nome Azienda</Label>
+          <Input id="companyName" type="text" value={data.companyName || ''} onChange={e => handleChange('companyName', e.target.value)} />
+        </div>
         <div className="space-y-2">
           <Label htmlFor="timeHorizon">Orizzonte Temporale (Anni)</Label>
           <Input id="timeHorizon" type="number" value={data.timeHorizon} onChange={e => handleChange('timeHorizon', Number(e.target.value))} />

@@ -1,4 +1,6 @@
+
 export interface GeneralAssumptions {
+  companyName: string;
   timeHorizon: number;
   startDate: string;
   inflationRate: number;
