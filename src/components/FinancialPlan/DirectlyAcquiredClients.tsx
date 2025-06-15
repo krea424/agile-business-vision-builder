@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
@@ -57,13 +56,13 @@ export function DirectlyAcquiredClients({ data, setData }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Cliente/Gruppo Clienti</TableHead>
+              <TableHead className="min-w-[150px]">Cliente/Gruppo Clienti</TableHead>
               <TableHead className="text-right">Nr. Clienti</TableHead>
-              <TableHead className="text-right">Mese Partenza (da inizio progetto)</TableHead>
-              <TableHead>Tipo Servizio</TableHead>
-              <TableHead className="text-right">Importo Annuo (€)</TableHead>
-              <TableHead className="text-right">Importo Mensile (€)</TableHead>
-              <TableHead className="text-right">Fatturato Annuo Atteso</TableHead>
+              <TableHead className="text-right min-w-[180px]">Mese Partenza (da inizio progetto)</TableHead>
+              <TableHead className="min-w-[150px]">Tipo Servizio</TableHead>
+              <TableHead className="text-right min-w-[180px]">Importo Annuo (€)</TableHead>
+              <TableHead className="text-right min-w-[180px]">Importo Mensile (€)</TableHead>
+              <TableHead className="text-right min-w-[200px]">Fatturato Annuo Atteso</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>

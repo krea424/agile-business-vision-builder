@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
@@ -53,13 +54,13 @@ export function NewClients({ data, setData }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Canale/Servizio</TableHead>
-              <TableHead>Investimento Marketing Mensile (€)</TableHead>
-              <TableHead>Lead / 100€ investiti</TableHead>
-              <TableHead>Tasso Conversione (%)</TableHead>
-              <TableHead>Valore Medio Contratto Annuo (€)</TableHead>
-              <TableHead className="text-right">Mese Partenza (da inizio progetto)</TableHead>
-              <TableHead className="text-right">Ricavi Annui Ricorrenti Generati</TableHead>
+              <TableHead className="min-w-[150px]">Canale/Servizio</TableHead>
+              <TableHead className="min-w-[220px]">Investimento Marketing Mensile (€)</TableHead>
+              <TableHead className="min-w-[160px]">Lead / 100€ investiti</TableHead>
+              <TableHead className="min-w-[160px]">Tasso Conversione (%)</TableHead>
+              <TableHead className="min-w-[220px]">Valore Medio Contratto Annuo (€)</TableHead>
+              <TableHead className="text-right min-w-[180px]">Mese Partenza (da inizio progetto)</TableHead>
+              <TableHead className="text-right min-w-[220px]">Ricavi Annui Ricorrenti Generati</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
