@@ -109,29 +109,129 @@ const exportToPptx = (planData: FinancialPlanState, dashboardData: any) => {
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
 
+    // SLIDE 1: Title
     const slide1 = pptx.addSlide();
-    slide1.addText(`Report Finanziario: ${planData.general.companyName}`, { x: 0.5, y: 1.5, fontSize: 32, bold: true, color: '003366' });
-    slide1.addText(`Scenario: ${planData.general.scenarioName}`, { x: 0.5, y: 2.5, fontSize: 22, color: '333333' });
-    slide1.addText(`Data: ${new Date().toLocaleDateString('it-IT')}`, { x: 0.5, y: 5.0, fontSize: 14, color: '888888' });
+    slide1.addText(planData.general.companyName, { x: 0.5, y: 1.5, w:'90%', fontSize: 36, bold: true, color: '003366', align: 'center' });
+    slide1.addText(`Financial Sustainability Plan`, { x: 0.5, y: 2.5, w:'90%', fontSize: 24, color: '333333', align: 'center' });
+    slide1.addText(`Scenario: ${planData.general.scenarioName}`, { x: 0.5, y: 3.0, w:'90%', fontSize: 18, color: '333333', align: 'center' });
+    slide1.addText(`Data: ${new Date().toLocaleDateString('it-IT')}`, { x: 0.5, y: 5.0, w:'90%', fontSize: 14, color: '888888', align: 'center' });
 
+    // SLIDE 2: KPIs
     const slide2 = pptx.addSlide();
-    slide2.addText('Executive Summary - Metriche Chiave', { x: 0.5, y: 0.5, fontSize: 24, bold: true, color: '003366' });
-    const kpis = dashboardData.kpis;
-    const kpiText = [
-        { text: 'Fabbisogno Finanziario: ', options: { bold: true } },
-        { text: formatCurrency(kpis.peakFundingRequirement) },
-        { text: '\nValore d\'Impresa (a 5 anni): ', options: { bold: true } },
-        { text: formatCurrency(kpis.enterpriseValue) },
-        { text: '\nIRR: ', options: { bold: true } },
-        { text: `${kpis.irr ? (kpis.irr * 100).toFixed(1) : 'N/A'}%` },
-        { text: '\nPayback Period: ', options: { bold: true } },
-        { text: kpis.paybackPeriodYears ? `${kpis.paybackPeriodYears.toFixed(1)} Anni` : 'N/A' },
-        { text: '\nBreak-Even Point (EBITDA): ', options: { bold: true } },
-        { text: kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto' },
-    ];
-    slide2.addText(kpiText, { x: 1, y: 1.5, w: '80%', h: 3, fontSize: 16, charSpacing: 1, lineSpacing: 28 });
-    slide2.addText('Nota: I grafici e le tabelle dettagliate non sono inclusi in questa esportazione base.', { x: 0.5, y: 5, fontSize: 12, color: 'C00000' });
+    slide2.addText('Executive Summary - Metriche Chiave', { x: 0.5, y: 0.25, fontSize: 24, bold: true, color: '003366' });
+    const { kpis } = dashboardData;
+
+    const kpiRows: (string | { text: string; options: any })[][] = [];
+    const headerOptions = { fill: '003366', color: 'FFFFFF', bold: true, valign: 'middle', align: 'center', fontSize: 12 };
+    kpiRows.push([{ text: 'Metrica Chiave', options: headerOptions }, { text: 'Valore', options: headerOptions }]);
+
+    const cellStyle = { valign: 'middle', border: { type: 'solid' as const, pt: 1, color: 'D9D9D9' }, fontSize: 11, fontFace: 'Arial', margin: [0,5,0,5] };
+    const metricCellStyle = { ...cellStyle, align: 'left' as const, bold: true, color: '333333' };
+    const valueCellStyle = { ...cellStyle, align: 'right' as const, color: '003366', bold: true };
+
+    const addRow = (metric: string, value: string) => {
+        kpiRows.push([{ text: metric, options: metricCellStyle }, { text: value, options: valueCellStyle }]);
+    };
+
+    addRow('Fabbisogno Finanziario', formatCurrency(kpis.peakFundingRequirement));
+    addRow('Valore d\'Impresa (a 5 anni)', formatCurrency(kpis.enterpriseValue));
+    addRow('IRR (Internal Rate of Return)', `${kpis.irr ? (kpis.irr * 100).toFixed(1) : 'N/A'}%`);
+    addRow('Payback Period', kpis.paybackPeriodYears ? `${kpis.paybackPeriodYears.toFixed(1)} Anni` : 'N/A');
+    addRow('Break-Even Point (EBITDA)', kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto');
+    addRow('Punto di Cassa più Basso', kpis.lowestCashPoint ? `${formatCurrency(kpis.lowestCashPoint.value)} (Mese ${kpis.lowestCashPoint.month})` : 'N/A');
     
+    slide2.addTable(kpiRows, { x: 0.5, y: 1.0, w: 9, colW: [4.5, 4.5], rowH: 0.5 });
+    
+    // SLIDE 3: Chart
+    if (dashboardData.monthlyChartData && dashboardData.monthlyChartData.length > 0) {
+        const slide3 = pptx.addSlide();
+        slide3.addText('Andamento Economico e Finanziario', { x: 0.5, y: 0.25, fontSize: 24, bold: true, color: '003366' });
+
+        const chartLabels = dashboardData.monthlyChartData.map((d: any) => d.name);
+        
+        const chartData = [
+            {
+                name: 'Ricavi (€k)',
+                labels: chartLabels,
+                values: dashboardData.monthlyChartData.map((d: any) => Math.round((d.Ricavi || 0) / 1000)),
+            },
+            {
+                name: 'EBITDA (€k)',
+                labels: chartLabels,
+                values: dashboardData.monthlyChartData.map((d: any) => Math.round((d.EBITDA || 0) / 1000)),
+            },
+            {
+                name: 'Cassa Finale (€k)',
+                labels: chartLabels,
+                values: dashboardData.monthlyChartData.map((d: any) => Math.round((d['Cassa Finale'] || 0) / 1000)),
+            },
+        ];
+
+        const chartOptions: PptxGenJS.IChartOpts = {
+            x: 0.5, y: 1.0, w: 9, h: 4.5,
+            showLegend: true, legendPos: 'b',
+            catAxisLabelFontBold: true,
+            valAxisLabelFormatCode: '#,##0',
+            valAxisTitle: 'Importo (€k)',
+        };
+        
+        const chartTypes: PptxGenJS.IChartMulti[] = [
+            {
+                type: 'bar',
+                data: [chartData[0]],
+                options: { barDir: 'col', dataLabelColor: 'FFFFFF', dataLabelPosition: 'ctr',
+                fill: '4A86E8', // Blue for Ricavi
+              },
+            },
+            {
+                type: 'line',
+                data: [chartData[1]],
+                options: { lineSmooth: true, lineSize: 3, symbol: 'circle', symbolSize: 6,
+                lineColor: 'F6B26B', // Orange for EBITDA
+              },
+            },
+            {
+                type: 'line',
+                data: [chartData[2]],
+                options: { lineSmooth: true, lineSize: 3, symbol: 'triangle', symbolSize: 6, secondaryValAxis: true, valAxisTitle: 'Cassa (€k)', valAxisLabelFormatCode: '#,##0',
+                lineColor: '6AA84F', // Green for Cassa
+              },
+            },
+        ];
+        
+        slide3.addChart(chartTypes, chartOptions);
+    }
+    
+    // SLIDE 4: Insights
+    if (dashboardData.automatedInsights && dashboardData.automatedInsights.length > 0) {
+        let insightSlide = pptx.addSlide();
+        insightSlide.addText('Insight Automatici', { x: 0.5, y: 0.25, fontSize: 24, bold: true, color: '003366' });
+        
+        let yPos = 1.2;
+        dashboardData.automatedInsights.forEach((insight: any) => {
+            const textArr = pptx.util.getSlideText(insight.description, { w: 8.6, fontFace: 'Arial', fontSize: 12 });
+            const insightHeight = textArr.length * 0.25 + 0.6;
+
+            if (yPos + insightHeight > 5.5) {
+                insightSlide = pptx.addSlide();
+                insightSlide.addText('Insight Automatici (continua)', { x: 0.5, y: 0.25, fontSize: 24, bold: true, color: '003366' });
+                yPos = 1.2;
+            }
+
+            insightSlide.addText(insight.title, {
+                x: 0.7, y: yPos, w: '90%',
+                fontFace: 'Arial', fontSize: 14, bold: true,
+                color: insight.variant === 'destructive' ? 'C00000' : '0070C0',
+            });
+            yPos += 0.4;
+            insightSlide.addText(insight.description, {
+                x: 0.7, y: yPos, w: 8.6,
+                fontFace: 'Arial', fontSize: 12, color: '333333',
+            });
+            yPos += insightHeight;
+        });
+    }
+
     pptx.writeFile({ fileName: `${planData.general.scenarioName.replace(/ /g, '_')}_Report.pptx` });
 };
 
