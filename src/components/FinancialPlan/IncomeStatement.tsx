@@ -105,11 +105,25 @@ export function IncomeStatement({ data }: Props) {
                 {rows.map(row => (
                   <TableRow key={row.label} className={row.isHighlighted ? 'bg-green-50 dark:bg-green-900/20' : ''}>
                     <TableCell className={row.isBold ? 'font-semibold text-gray-800 dark:text-gray-100' : ''}>{row.label}</TableCell>
-                    {data.map(yearData => (
-                      <TableCell key={yearData.year} className={`text-right tabular-nums ${row.isBold ? 'font-semibold text-gray-800 dark:text-gray-100' : ''}`}>
-                        {formatCurrency(yearData[row.key] as number)}
-                      </TableCell>
-                    ))}
+                    {data.map(yearData => {
+                      const value = yearData[row.key] as number;
+                      const coloredRows = ['recoverableClientRevenues', 'newClientRevenues', 'revenues', 'ebitda', 'ebit', 'netProfit'];
+                      let colorClass = '';
+
+                      if (coloredRows.includes(row.key) && typeof value === 'number') {
+                        if (value > 0) {
+                          colorClass = 'text-green-600';
+                        } else if (value < 0) {
+                          colorClass = 'text-red-600';
+                        }
+                      }
+                      
+                      return (
+                        <TableCell key={yearData.year} className={`text-right tabular-nums ${row.isBold ? 'font-semibold text-gray-800 dark:text-gray-100' : ''} ${colorClass}`}>
+                          {formatCurrency(value)}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))}
               </TableBody>

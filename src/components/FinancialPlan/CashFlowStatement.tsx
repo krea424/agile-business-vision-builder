@@ -101,11 +101,27 @@ export function CashFlowStatement({ data }: Props) {
                 {rows.map(row => (
                   <TableRow key={row.label} className={row.isHighlighted ? 'bg-blue-50 dark:bg-blue-900/20' : ''}>
                     <TableCell className={row.isBold ? 'font-semibold text-gray-800 dark:text-gray-100' : ''}>{row.label}</TableCell>
-                    {data.map(yearData => (
-                      <TableCell key={yearData.year} className={`text-right tabular-nums ${row.isBold ? 'font-semibold text-gray-800 dark:text-gray-100' : ''} ${(yearData[row.key] as number) < 0 && !row.isPositive ? 'text-red-600' : ''}`}>
-                        {formatCurrency(yearData[row.key] as number)}
-                      </TableCell>
-                    ))}
+                    {data.map(yearData => {
+                      const value = yearData[row.key] as number;
+                      let colorClass = '';
+
+                      if (typeof value === 'number' && value !== 0) {
+                        const standardColorRows: (keyof CashFlowYearlyData)[] = ['netProfit', 'grossOperatingCashFlow', 'cashFlowFromOperations', 'cashFlowFromInvesting', 'cashFlowFromFinancing', 'netCashFlow', 'startingCash', 'endingCash', 'amortization', 'equityInjection'];
+                        const invertedColorRows: (keyof CashFlowYearlyData)[] = ['changeInWorkingCapital', 'capex'];
+                        
+                        if (standardColorRows.includes(row.key)) {
+                          colorClass = value > 0 ? 'text-green-600' : 'text-red-600';
+                        } else if (invertedColorRows.includes(row.key)) {
+                          colorClass = value > 0 ? 'text-red-600' : 'text-green-600';
+                        }
+                      }
+
+                      return (
+                        <TableCell key={yearData.year} className={`text-right tabular-nums ${row.isBold ? 'font-semibold text-gray-800 dark:text-gray-100' : ''} ${colorClass}`}>
+                          {formatCurrency(value)}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))}
               </TableBody>
