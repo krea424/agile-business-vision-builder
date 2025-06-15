@@ -1,6 +1,5 @@
-
 import { useState, useMemo } from 'react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinancialPlanState } from '@/components/FinancialPlan/types';
 import { GeneralAssumptions } from '@/components/FinancialPlan/GeneralAssumptions';
 import { RecoverableClients } from '@/components/FinancialPlan/RecoverableClients';
@@ -94,61 +93,44 @@ const Index = () => {
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">Il suo simulatore di volo per testare le decisioni strategiche.</p>
         </header>
         
-        <Accordion type="single" collapsible className="w-full space-y-6" defaultValue='item-1'>
-          <AccordionItem value="item-1" className="border-none overflow-hidden rounded-lg bg-card shadow-sm">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold px-6 py-4 hover:no-underline data-[state=open]:border-b">
-              1. Ipotesi Generali
-            </AccordionTrigger>
-            <AccordionContent className="px-6 pb-6">
-              <GeneralAssumptions data={planData.general} setData={setGeneral} />
-            </AccordionContent>
-          </AccordionItem>
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-6">
+            <TabsTrigger value="general">1. Generali</TabsTrigger>
+            <TabsTrigger value="revenues">2. Ricavi</TabsTrigger>
+            <TabsTrigger value="costs">3. Costi</TabsTrigger>
+            <TabsTrigger value="income">4. C. Economico</TabsTrigger>
+            <TabsTrigger value="cashflow">5. Flusso di Cassa</TabsTrigger>
+          </TabsList>
 
-          <AccordionItem value="item-2" className="border-none overflow-hidden rounded-lg bg-card shadow-sm">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold px-6 py-4 hover:no-underline data-[state=open]:border-b">
-              2. Ipotesi Ricavi
-            </AccordionTrigger>
-            <AccordionContent className="space-y-6 px-6 pb-6">
-              <RecoverableClients data={planData.recoverableClients} setData={setRecoverableClients} />
-              <NewClients data={planData.newClients} setData={setNewClients} />
-            </AccordionContent>
-          </AccordionItem>
+          <TabsContent value="general">
+            <GeneralAssumptions data={planData.general} setData={setGeneral} />
+          </TabsContent>
 
-          <AccordionItem value="item-3" className="border-none overflow-hidden rounded-lg bg-card shadow-sm">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold px-6 py-4 hover:no-underline data-[state=open]:border-b">
-              3. Ipotesi Costi
-            </AccordionTrigger>
-            <AccordionContent className="space-y-6 px-6 pb-6">
-              <PersonnelCosts data={planData.personnelCosts} setData={setPersonnelCosts} />
-              <OperationalInvestments 
-                  fixedCosts={planData.fixedCosts}
-                  variableCosts={planData.variableCosts}
-                  initialInvestments={planData.initialInvestments}
-                  setFixedCosts={setFixedCosts}
-                  setVariableCosts={setVariableCosts}
-                  setInitialInvestments={setInitialInvestments}
-              />
-            </AccordionContent>
-          </AccordionItem>
+          <TabsContent value="revenues" className="space-y-6">
+            <RecoverableClients data={planData.recoverableClients} setData={setRecoverableClients} />
+            <NewClients data={planData.newClients} setData={setNewClients} />
+          </TabsContent>
 
-          <AccordionItem value="item-4" className="border-none overflow-hidden rounded-lg bg-card shadow-sm">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold px-6 py-4 hover:no-underline data-[state=open]:border-b">
-              4. Conto Economico Proiettato
-            </AccordionTrigger>
-            <AccordionContent className="px-6 pb-6">
-              <IncomeStatement data={financialSummary} />
-            </AccordionContent>
-          </AccordionItem>
+          <TabsContent value="costs" className="space-y-6">
+            <PersonnelCosts data={planData.personnelCosts} setData={setPersonnelCosts} />
+            <OperationalInvestments 
+                fixedCosts={planData.fixedCosts}
+                variableCosts={planData.variableCosts}
+                initialInvestments={planData.initialInvestments}
+                setFixedCosts={setFixedCosts}
+                setVariableCosts={setVariableCosts}
+                setInitialInvestments={setInitialInvestments}
+            />
+          </TabsContent>
 
-          <AccordionItem value="item-5" className="border-none overflow-hidden rounded-lg bg-card shadow-sm">
-            <AccordionTrigger className="text-lg md:text-xl font-semibold px-6 py-4 hover:no-underline data-[state=open]:border-b">
-              5. Rendiconto Finanziario Proiettato (Flusso di Cassa)
-            </AccordionTrigger>
-            <AccordionContent className="px-6 pb-6">
-              <CashFlowStatement data={cashFlowSummary} />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+          <TabsContent value="income">
+            <IncomeStatement data={financialSummary} />
+          </TabsContent>
+
+          <TabsContent value="cashflow">
+            <CashFlowStatement data={cashFlowSummary} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
