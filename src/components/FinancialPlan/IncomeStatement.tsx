@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -44,7 +43,7 @@ export function IncomeStatement({ data, currency = 'EUR' }: Props) {
   const formatPercentage = (value: number) => new Intl.NumberFormat('it-IT', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value / 100);
 
   const tableHeaders = ["Voce", ...data.map(d => `Anno ${d.year}`)];
-  const rows: { label: string; key: string; isBold?: boolean; isHighlighted?: boolean; isPercentage?: boolean; isSubtle?: boolean; }[] = [
+  const rows: { label: string; key: keyof YearlyData; isBold?: boolean; isHighlighted?: boolean; isPercentage?: boolean; isSubtle?: boolean; }[] = [
     { label: "Ricavi da Clienti Recuperati", key: 'recoverableClientRevenues', isSubtle: true },
     { label: "Ricavi da Nuovi Clienti (Marketing)", key: 'newClientRevenues', isSubtle: true },
     { label: "Ricavi da Clienti Diretti", key: 'directlyAcquiredClientRevenues', isSubtle: true },

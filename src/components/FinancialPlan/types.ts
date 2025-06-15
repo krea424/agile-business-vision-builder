@@ -153,6 +153,10 @@ export interface YearlyData {
   netProfit: number;
   loanPrincipalRepayment: number;
   weightedAverageCollectionDays?: number;
+  contributionMarginPercentage: number;
+  ebitdaMargin: number;
+  ebitMargin: number;
+  netProfitMargin: number;
 }
 
 export interface CashFlowYearlyData {
