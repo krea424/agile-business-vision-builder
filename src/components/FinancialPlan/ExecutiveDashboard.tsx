@@ -1,9 +1,10 @@
+
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FinancialPlanState } from '@/components/FinancialPlan/types';
 import { calculateFinancialSummary } from '@/components/FinancialPlan/financialCalculator';
 import { calculateCashFlowSummary } from '@/components/FinancialPlan/cashFlowCalculator';
-import { calculateDashboardData, Insight } from './dashboardCalculator';
+import { calculateDashboardData, Insight, DashboardData } from './dashboardCalculator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend, Bar, Line } from 'recharts';
@@ -40,9 +41,25 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
 
   const financialSummary = useMemo(() => calculateFinancialSummary(planData), [planData]);
   const cashFlowSummary = useMemo(() => calculateCashFlowSummary(planData, financialSummary), [planData, financialSummary]);
-  const dashboardData = useMemo(() => calculateDashboardData(planData, financialSummary, cashFlowSummary), [planData, financialSummary, cashFlowSummary]);
+  const dashboardData: DashboardData = useMemo(() => calculateDashboardData(planData, financialSummary, cashFlowSummary), [planData, financialSummary, cashFlowSummary]);
   
   const { kpis, monthlyChartData, automatedInsights } = dashboardData;
+
+  // Type guard to ensure KPIs are loaded
+  if (!('peakFundingRequirement' in kpis)) {
+    return (
+        <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Dati non disponibili</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">I calcoli sono in corso o i dati di input non sono sufficienti per generare la dashboard.</p>
+                </CardContent>
+            </Card>
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">

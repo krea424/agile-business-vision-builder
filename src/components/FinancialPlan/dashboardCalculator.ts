@@ -34,6 +34,21 @@ export type Insight = {
     description: string;
 };
 
+export type KpiData = {
+  peakFundingRequirement: number;
+  paybackPeriodYears: number | null;
+  irr: number;
+  enterpriseValue: number;
+  breakEvenMonth: number | null;
+  lowestCashPoint: { value: number; month: number; };
+};
+
+export type DashboardData = {
+    kpis: KpiData | {};
+    monthlyChartData: { name: string; Ricavi: number; EBITDA: number; 'Cassa Finale': number; }[];
+    automatedInsights: Insight[];
+};
+
 export const generateAutomatedInsights = (plan: FinancialPlanState, kpis: any, yearlyFinancials: YearlyData[]): Insight[] => {
     const insights: Insight[] = [];
 
@@ -108,7 +123,7 @@ export const generateAutomatedInsights = (plan: FinancialPlanState, kpis: any, y
     return insights;
 };
 
-export const calculateDashboardData = (plan: FinancialPlanState, yearlyFinancials: YearlyData[], yearlyCashFlow: CashFlowYearlyData[]) => {
+export const calculateDashboardData = (plan: FinancialPlanState, yearlyFinancials: YearlyData[], yearlyCashFlow: CashFlowYearlyData[]): DashboardData => {
     if (!plan || yearlyFinancials.length === 0 || yearlyCashFlow.length === 0) {
         return {
             kpis: {},
@@ -194,7 +209,7 @@ export const calculateDashboardData = (plan: FinancialPlanState, yearlyFinancial
     const paybackMonthData = monthlyData.find(d => d.cumulativeFcf > 0);
     const paybackPeriodYears = paybackMonthData ? paybackMonthData.month / 12 : null;
 
-    const kpis = {
+    const kpis: KpiData = {
         peakFundingRequirement: peakFundingReq,
         paybackPeriodYears: paybackPeriodYears,
         irr: irr,
