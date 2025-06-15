@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { FinancialPlanState } from '@/components/FinancialPlan/types';
 import { GeneralAssumptions } from '@/components/FinancialPlan/GeneralAssumptions';
@@ -18,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, Save } from "lucide-react";
 
 const initialPlanState: FinancialPlanState = {
   general: {
@@ -122,6 +123,8 @@ const Index = () => {
     }
   }, [planData, financialSummary]);
 
+  const navigate = useNavigate();
+  const handleExport = () => navigate('/report', { state: { planData, financialSummary, cashFlowSummary } });
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">
@@ -131,7 +134,7 @@ const Index = () => {
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">Il suo simulatore di volo per testare le decisioni strategiche.</p>
         </header>
         
-        <div className="flex justify-start mb-6">
+        <div className="flex justify-between items-center mb-6">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
@@ -146,6 +149,9 @@ const Index = () => {
               <DropdownMenuItem onSelect={() => setActiveTab('cashflow')}>5. Flusso di Cassa</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button onClick={handleExport}>
+            <Save className="mr-2 h-4 w-4" /> Salva ed Esporta Scenario
+          </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
