@@ -21,7 +21,7 @@ export function GeneralAssumptions({ data, setData }: Props) {
       <CardHeader>
         <CardTitle>Ipotesi Generali</CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-2">
           <Label htmlFor="timeHorizon">Orizzonte Temporale (Anni)</Label>
           <Input id="timeHorizon" type="number" value={data.timeHorizon} onChange={e => handleChange('timeHorizon', Number(e.target.value))} />
@@ -31,8 +31,12 @@ export function GeneralAssumptions({ data, setData }: Props) {
           <Input id="startDate" type="text" value={data.startDate} onChange={e => handleChange('startDate', e.target.value)} placeholder="Es. gen-25" />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="inflationRate">Tasso di Inflazione/Crescita Costi Annuale (%)</Label>
+          <Label htmlFor="inflationRate">Tasso di Inflazione (%)</Label>
           <Input id="inflationRate" type="number" value={data.inflationRate} onChange={e => handleChange('inflationRate', Number(e.target.value))} />
+        </div>
+         <div className="space-y-2">
+          <Label htmlFor="equityInjection">Apporto Capitale Proprio Iniziale (€)</Label>
+          <Input id="equityInjection" type="number" value={data.equityInjection} onChange={e => handleChange('equityInjection', Number(e.target.value))} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="iresRate">Aliquota IRES (%)</Label>
@@ -41,6 +45,14 @@ export function GeneralAssumptions({ data, setData }: Props) {
         <div className="space-y-2">
           <Label htmlFor="irapRate">Aliquota IRAP (%)</Label>
           <Input id="irapRate" type="number" value={data.irapRate} onChange={e => handleChange('irapRate', Number(e.target.value))} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="daysToCollectReceivables">Giorni medi incasso clienti</Label>
+          <Input id="daysToCollectReceivables" type="number" value={data.daysToCollectReceivables} onChange={e => handleChange('daysToCollectReceivables', Number(e.target.value))} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="daysToPayPayables">Giorni medi pagamento fornitori</Label>
+          <Input id="daysToPayPayables" type="number" value={data.daysToPayPayables} onChange={e => handleChange('daysToPayPayables', Number(e.target.value))} />
         </div>
       </CardContent>
     </Card>

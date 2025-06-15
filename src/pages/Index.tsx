@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { FinancialPlanState } from '@/components/FinancialPlan/types';
@@ -8,6 +9,8 @@ import { PersonnelCosts } from '@/components/FinancialPlan/PersonnelCosts';
 import { OperationalInvestments } from '@/components/FinancialPlan/OperationalInvestments';
 import { IncomeStatement } from '@/components/FinancialPlan/IncomeStatement';
 import { calculateFinancialSummary } from '@/components/FinancialPlan/financialCalculator';
+import { CashFlowStatement } from '@/components/FinancialPlan/CashFlowStatement';
+import { calculateCashFlowSummary } from '@/components/FinancialPlan/cashFlowCalculator';
 
 const initialPlanState: FinancialPlanState = {
   general: {
@@ -16,6 +19,9 @@ const initialPlanState: FinancialPlanState = {
     inflationRate: 3.0,
     iresRate: 24.0,
     irapRate: 3.9,
+    equityInjection: 100000,
+    daysToCollectReceivables: 60,
+    daysToPayPayables: 30,
   },
   recoverableClients: [
     { id: '1', name: 'yardreaas', previousAnnualRevenue: 400000, recoveryProbability: 80, contractStartDateMonth: 3, serviceType: 'ricorrente', recoveryAmountPercentage: 30 },
@@ -70,6 +76,16 @@ const Index = () => {
     }
   }, [planData]);
 
+  const cashFlowSummary = useMemo(() => {
+    try {
+      return calculateCashFlowSummary(planData, financialSummary);
+    } catch (error) {
+      console.error("Error calculating cash flow summary:", error);
+      return [];
+    }
+  }, [planData, financialSummary]);
+
+
   return (
     <div className="container mx-auto p-4 md:p-8">
       <header className="mb-8">
@@ -112,6 +128,13 @@ const Index = () => {
           <AccordionTrigger className="text-xl font-semibold">4. Conto Economico Proiettato</AccordionTrigger>
           <AccordionContent>
             <IncomeStatement data={financialSummary} />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-5">
+          <AccordionTrigger className="text-xl font-semibold">5. Rendiconto Finanziario Proiettato (Flusso di Cassa)</AccordionTrigger>
+          <AccordionContent>
+            <CashFlowStatement data={cashFlowSummary} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

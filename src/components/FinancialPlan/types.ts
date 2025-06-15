@@ -4,6 +4,9 @@ export interface GeneralAssumptions {
   inflationRate: number;
   iresRate: number;
   irapRate: number;
+  equityInjection: number;
+  daysToCollectReceivables: number;
+  daysToPayPayables: number;
 }
 
 export interface RecoverableClient {
@@ -75,4 +78,20 @@ export interface YearlyData {
   ebit: number;
   taxes: number;
   netProfit: number;
+}
+
+export interface CashFlowYearlyData {
+  year: number;
+  netProfit: number;
+  amortization: number;
+  grossOperatingCashFlow: number;
+  changeInWorkingCapital: number;
+  cashFlowFromOperations: number;
+  capex: number;
+  cashFlowFromInvesting: number;
+  equityInjection: number;
+  cashFlowFromFinancing: number;
+  netCashFlow: number;
+  startingCash: number;
+  endingCash: number;
 }
