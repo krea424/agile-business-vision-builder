@@ -135,6 +135,7 @@ export interface YearlyData {
   taxes: number;
   netProfit: number;
   loanPrincipalRepayment: number;
+  weightedAverageCollectionDays?: number;
 }
 
 export interface CashFlowYearlyData {

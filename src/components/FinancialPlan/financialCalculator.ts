@@ -41,13 +41,16 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
     
     recurringRevenueFromNewClients *= (1 - (general.customerChurnRate || 0) / 100);
 
+    let totalWeightedCollectionDaysNumerator = 0;
+
     // --- REVENUES ---
     let recoverableRevenueThisYear = 0;
     recoverableClients.forEach(client => {
-      const annualPotentialRevenue = client.previousAnnualRevenue * (client.recoveryAmountPercentage / 100) * (client.recoveryProbability / 100);
-      const startMonth = client.contractStartDateMonth;
+      let clientRevenueThisYear = 0;
       
       if (client.serviceType === 'una_tantum') {
+        const annualPotentialRevenue = client.previousAnnualRevenue * (client.recoveryAmountPercentage / 100) * (client.recoveryProbability / 100);
+        const startMonth = client.contractStartDateMonth;
         let chargeYear = 1;
         let cumulativeMonths = monthsInFirstYear;
         while (startMonth > cumulativeMonths) {
@@ -55,22 +58,51 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
             cumulativeMonths += 12;
         }
         if (year === chargeYear) {
-            recoverableRevenueThisYear += annualPotentialRevenue;
+            clientRevenueThisYear += annualPotentialRevenue;
         }
       } else { // ricorrente
-        // Implement logic for contract duration
-        const durationMonths = client.contractDurationMonths || (general.timeHorizon * 12);
-        const contractEndMonth = startMonth + durationMonths - 1;
+        let currentAnnualPotentialRevenue = client.previousAnnualRevenue * (client.recoveryAmountPercentage / 100) * (client.recoveryProbability / 100);
+        let contractInstanceStartMonth = client.contractStartDateMonth;
+        let keepCalculating = true;
+        
+        while(keepCalculating && currentAnnualPotentialRevenue > 0.01) {
+            const durationMonths = client.contractDurationMonths || (general.timeHorizon * 12);
+            const contractInstanceEndMonth = contractInstanceStartMonth + durationMonths - 1;
+            
+            const firstActiveMonthInYear = Math.max(contractInstanceStartMonth, firstMonthOfCurrentYear);
+            const lastActiveMonthInYear = Math.min(contractInstanceEndMonth, lastMonthOfCurrentYear);
 
-        const firstMonthOfActivity = Math.max(startMonth, firstMonthOfCurrentYear);
-        const lastMonthOfActivity = Math.min(contractEndMonth, lastMonthOfCurrentYear);
+            if (firstActiveMonthInYear <= lastActiveMonthInYear) {
+                const monthlyPotentialRevenue = currentAnnualPotentialRevenue / 12;
+                const rampUpMonths = client.activationRampUpMonths || 0;
+                
+                for (let m = firstActiveMonthInYear; m <= lastActiveMonthInYear; m++) {
+                    let revenueForThisMonth = monthlyPotentialRevenue;
+                    const monthInContract = m - contractInstanceStartMonth + 1;
 
-        if (lastMonthOfActivity >= firstMonthOfActivity) {
-            const monthsOfActivity = lastMonthOfActivity - firstMonthOfActivity + 1;
-            recoverableRevenueThisYear += (annualPotentialRevenue / 12) * monthsOfActivity;
+                    if (rampUpMonths > 0 && monthInContract <= rampUpMonths) {
+                        revenueForThisMonth *= (monthInContract / rampUpMonths);
+                    }
+                    clientRevenueThisYear += revenueForThisMonth;
+                }
+            }
+
+            if (contractInstanceEndMonth < lastMonthOfCurrentYear) {
+                const renewalProbability = (client.renewalProbability || 0) / 100;
+                if (renewalProbability > 0) {
+                    contractInstanceStartMonth = contractInstanceEndMonth + 1;
+                    currentAnnualPotentialRevenue *= renewalProbability;
+                } else {
+                    keepCalculating = false;
+                }
+            } else {
+                keepCalculating = false;
+            }
         }
-        // NOTE: Renewal, ramp-up and other complex logic will be added in next steps.
       }
+      recoverableRevenueThisYear += clientRevenueThisYear;
+      const delay = client.specificCollectionDays ?? general.daysToCollectReceivables;
+      totalWeightedCollectionDaysNumerator += clientRevenueThisYear * delay;
     });
 
     let directlyAcquiredClientRevenuesThisYear = 0;
@@ -94,6 +126,7 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
         }
       });
     }
+    totalWeightedCollectionDaysNumerator += directlyAcquiredClientRevenuesThisYear * general.daysToCollectReceivables;
 
     let newClientRevenueGeneratedThisYear = 0;
     newClients.forEach(channel => {
@@ -107,8 +140,13 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
     
     const totalNewClientRevenueThisYear = recurringRevenueFromNewClients + newClientRevenueGeneratedThisYear;
     recurringRevenueFromNewClients = totalNewClientRevenueThisYear;
+    totalWeightedCollectionDaysNumerator += totalNewClientRevenueThisYear * general.daysToCollectReceivables;
 
     const totalRevenues = recoverableRevenueThisYear + totalNewClientRevenueThisYear + directlyAcquiredClientRevenuesThisYear;
+    
+    const weightedAverageCollectionDays = totalRevenues > 0
+        ? totalWeightedCollectionDaysNumerator / totalRevenues
+        : general.daysToCollectReceivables;
 
     // --- COSTS ---
     let personnelCostThisYear = 0;
@@ -176,6 +214,7 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
       taxes,
       netProfit,
       loanPrincipalRepayment: principalPaymentThisYear,
+      weightedAverageCollectionDays,
     };
   });
   

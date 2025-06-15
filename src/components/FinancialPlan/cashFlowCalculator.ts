@@ -1,4 +1,3 @@
-
 import { FinancialPlanState, YearlyData, CashFlowYearlyData } from './types';
 
 export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStatement: YearlyData[]): CashFlowYearlyData[] {
@@ -21,14 +20,15 @@ export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStateme
   let previousYearAccountsPayable = 0;
 
   for (const yearData of incomeStatement) {
-    const { year, netProfit, amortization, revenues, fixedCosts, variableCosts, marketingCosts, loanPrincipalRepayment } = yearData;
+    const { year, netProfit, amortization, revenues, fixedCosts, variableCosts, marketingCosts, loanPrincipalRepayment, weightedAverageCollectionDays } = yearData;
 
     // FLUSSO DI CASSA OPERATIVO LORDO
     const grossOperatingCashFlow = netProfit + amortization;
     
     // VARIAZIONE CAPITALE CIRCOLANTE
     // Calcolo dei crediti verso clienti per l'anno corrente
-    const currentAccountsReceivable = revenues * (general.daysToCollectReceivables / 365);
+    const daysToCollect = weightedAverageCollectionDays ?? general.daysToCollectReceivables;
+    const currentAccountsReceivable = revenues * (daysToCollect / 365);
     
     // Calcolo dei debiti verso fornitori per l'anno corrente
     // I costi verso fornitori includono costi fissi, variabili e di marketing
