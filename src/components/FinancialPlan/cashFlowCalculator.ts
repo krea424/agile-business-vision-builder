@@ -80,6 +80,8 @@ export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStateme
       amortization,
       grossOperatingCashFlow,
       changeInWorkingCapital,
+      changeInReceivables: -changeInReceivables, // A positive change is a use of cash, so negative effect
+      changeInPayables, // A positive change is a source of cash, so positive effect
       cashFlowFromOperations,
       capex,
       cashFlowFromInvesting,
@@ -91,6 +93,7 @@ export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStateme
       netCashFlow,
       startingCash,
       endingCash,
+      minimumCashBuffer: general.minimumCashBuffer || 0,
     });
 
     // Update for next iteration

@@ -165,6 +165,8 @@ export interface CashFlowYearlyData {
   amortization: number;
   grossOperatingCashFlow: number;
   changeInWorkingCapital: number;
+  changeInReceivables: number;
+  changeInPayables: number;
   cashFlowFromOperations: number;
   capex: number;
   cashFlowFromInvesting: number;
@@ -176,4 +178,5 @@ export interface CashFlowYearlyData {
   netCashFlow: number;
   startingCash: number;
   endingCash: number;
+  minimumCashBuffer: number;
 }
