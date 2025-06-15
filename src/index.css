@@ -7,7 +7,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%; /* Lighter grey background */
+    --background: 220 20% 94%; /* A bit darker grey */
     --foreground: 224 71% 4%; /* Dark blue text */
 
     --card: 0 0% 100%;
@@ -19,20 +19,20 @@
     --primary: 204 92% 38%; /* McKinsey-like Blue */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 28% 95%; /* Light blue/grey */
+    --secondary: 220 20% 97%; /* Lighter grey, adjusted */
     --secondary-foreground: 224 71% 4%;
 
-    --muted: 215 28% 95%;
+    --muted: 220 20% 97%; /* Adjusted */
     --muted-foreground: 224 71% 25%;
 
-    --accent: 215 28% 95%;
+    --accent: 220 20% 97%; /* Adjusted */
     --accent-foreground: 224 71% 4%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 87%;
-    --input: 215 20% 87%;
+    --border: 220 15% 85%; /* Adjusted */
+    --input: 220 15% 85%; /* Adjusted */
     --ring: 204 92% 38%;
 
     --radius: 0.75rem; /* Slightly larger radius for a modern look */
@@ -102,3 +102,4 @@
     @apply bg-background text-foreground;
   }
 }
+
