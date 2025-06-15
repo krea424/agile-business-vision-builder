@@ -80,9 +80,9 @@ const ScenarioReport = () => {
                     
                     <Section title="2.1 Ricavi: Clienti da Recuperare">
                         <Table>
-                            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Fatturato Annuo Prec.</TableHead><TableHead>Prob. Recupero</TableHead><TableHead>% Recupero</TableHead></TableRow></TableHeader>
+                            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Fatturato Annuo Prec.</TableHead><TableHead>Prob. Recupero</TableHead><TableHead>% Recupero</TableHead><TableHead>% Incr. Annuo</TableHead></TableRow></TableHeader>
                             <TableBody>
-                                {planData.recoverableClients.map(c => <TableRow key={c.id}><TableCell>{c.name}</TableCell><TableCell>{formatCurrency(c.previousAnnualRevenue)}</TableCell><TableCell>{formatPercentage(c.recoveryProbability)}</TableCell><TableCell>{formatPercentage(c.recoveryAmountPercentage)}</TableCell></TableRow>)}
+                                {planData.recoverableClients.map(c => <TableRow key={c.id}><TableCell>{c.name}</TableCell><TableCell>{formatCurrency(c.previousAnnualRevenue)}</TableCell><TableCell>{formatPercentage(c.recoveryProbability)}</TableCell><TableCell>{formatPercentage(c.recoveryAmountPercentage)}</TableCell><TableCell>{formatPercentage(c.annualIncreasePercentage || 0)}</TableCell></TableRow>)}
                             </TableBody>
                         </Table>
                     </Section>
