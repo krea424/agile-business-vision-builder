@@ -53,8 +53,15 @@ export function PersonnelCostRow({ item, index, onInputChange, onContractTypeCha
           type="number"
           value={item.hiringMonth || ''}
           onChange={e => {
-            const value = parseInt(e.target.value, 10);
-            onInputChange(index, 'hiringMonth', isNaN(value) ? 0 : value);
+            const { value } = e.target;
+            if (value === '') {
+              onInputChange(index, 'hiringMonth', undefined);
+            } else {
+              const intValue = parseInt(value, 10);
+              if (!isNaN(intValue)) {
+                onInputChange(index, 'hiringMonth', intValue);
+              }
+            }
           }}
           onBlur={() => {
             if (!item.hiringMonth || item.hiringMonth < 1) {
