@@ -1,3 +1,4 @@
+
 import { FinancialPlanState, YearlyData, CashFlowYearlyData } from './types';
 
 export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStatement: YearlyData[]): CashFlowYearlyData[] {
@@ -20,7 +21,7 @@ export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStateme
   let previousYearAccountsPayable = 0;
 
   for (const yearData of incomeStatement) {
-    const { year, netProfit, amortization, revenues, fixedCosts, variableCosts, marketingCosts } = yearData;
+    const { year, netProfit, amortization, revenues, fixedCosts, variableCosts, marketingCosts, loanPrincipalRepayment } = yearData;
 
     // FLUSSO DI CASSA OPERATIVO LORDO
     const grossOperatingCashFlow = netProfit + amortization;
@@ -47,14 +48,20 @@ export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStateme
     const cashFlowFromOperations = grossOperatingCashFlow + changeInWorkingCapital;
 
     // FLUSSO DI CASSA DA ATTIVITÀ DI INVESTIMENTO (B)
-    // Capex is a cash outflow, happens in year 1
     const capex = (year === 1) ? -totalInvestment : 0;
     const cashFlowFromInvesting = capex;
     
     // FLUSSO DI CASSA DA ATTIVITÀ FINANZIARIA (C)
-    // Equity injection happens in year 1
-    const equityInjectionInYear = (year === 1) ? general.equityInjection : 0;
-    const cashFlowFromFinancing = equityInjectionInYear; // Will add debt later if needed
+    const equityInjectionInYear = (year === 1) ? (general.equityInjection || 0) : 0;
+    const loanProceedsInYear = (year === 1) ? (general.initialLoanAmount || 0) : 0;
+    const loanPrincipalRepaymentInYear = -(loanPrincipalRepayment || 0);
+    
+    let dividendsPaidInYear = 0;
+    if (year >= (general.dividendDistributionStartYear || 99) && netProfit > 0) {
+        dividendsPaidInYear = -netProfit * ((general.dividendDistributionPolicy || 0) / 100);
+    }
+    
+    const cashFlowFromFinancing = equityInjectionInYear + loanProceedsInYear + loanPrincipalRepaymentInYear + dividendsPaidInYear;
 
     // FLUSSO DI CASSA NETTO DEL PERIODO (A+B+C)
     const netCashFlow = cashFlowFromOperations + cashFlowFromInvesting + cashFlowFromFinancing;
@@ -73,6 +80,9 @@ export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStateme
       capex,
       cashFlowFromInvesting,
       equityInjection: equityInjectionInYear,
+      loanProceeds: loanProceedsInYear,
+      loanPrincipalRepayment: loanPrincipalRepaymentInYear,
+      dividendsPaid: dividendsPaidInYear,
       cashFlowFromFinancing,
       netCashFlow,
       startingCash,

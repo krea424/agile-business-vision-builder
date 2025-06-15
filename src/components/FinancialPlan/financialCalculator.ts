@@ -1,3 +1,4 @@
+
 import { FinancialPlanState, YearlyData } from './types';
 
 export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[] {
@@ -21,7 +22,10 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
   const projectStartMonthOfYear = monthMap[monthStr.toLowerCase()] || 1;
   const monthsInFirstYear = 12 - projectStartMonthOfYear + 1;
 
-  let cumulativeNewClientRevenue = 0;
+  let outstandingLoanBalance = general.initialLoanAmount || 0;
+  const annualPrincipalPayment = general.loanDurationMonths > 0 ? (general.initialLoanAmount || 0) / (general.loanDurationMonths / 12) : 0;
+  
+  let recurringRevenueFromNewClients = 0;
 
   const summary = years.map(year => {
     const inflationFactor = Math.pow(1 + general.inflationRate / 100, year - 1);
@@ -35,6 +39,8 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
         const effectiveStartMonth = Math.max(startMonth, firstMonthOfCurrentYear);
         return lastMonthOfCurrentYear - effectiveStartMonth + 1;
     };
+    
+    recurringRevenueFromNewClients *= (1 - (general.customerChurnRate || 0) / 100);
 
     // --- REVENUES ---
     let recoverableRevenueThisYear = 0;
@@ -83,15 +89,17 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
     let newClientRevenueGeneratedThisYear = 0;
     newClients.forEach(channel => {
         const monthsOfActivity = getMonthsOfActivity(channel.startMonth);
-        const marketingInvestmentThisYear = channel.monthlyMarketingInvestment * monthsOfActivity;
+        const effectiveMonthlyInvestment = channel.monthlyMarketingInvestment * Math.pow(1 + (general.annualNewRevenueGrowthRate || 0) / 100, year - 1);
+        const marketingInvestmentThisYear = effectiveMonthlyInvestment * monthsOfActivity;
         const leadsThisYear = (marketingInvestmentThisYear / 100) * channel.leadsPer100Invested;
         const newContractsThisYear = leadsThisYear * (channel.conversionRate / 100);
         newClientRevenueGeneratedThisYear += newContractsThisYear * channel.averageAnnualContractValue;
     });
-
-    cumulativeNewClientRevenue += newClientRevenueGeneratedThisYear;
     
-    const totalRevenues = recoverableRevenueThisYear + cumulativeNewClientRevenue + directlyAcquiredClientRevenuesThisYear;
+    const totalNewClientRevenueThisYear = recurringRevenueFromNewClients + newClientRevenueGeneratedThisYear;
+    recurringRevenueFromNewClients = totalNewClientRevenueThisYear;
+
+    const totalRevenues = recoverableRevenueThisYear + totalNewClientRevenueThisYear + directlyAcquiredClientRevenuesThisYear;
 
     // --- COSTS ---
     let personnelCostThisYear = 0;
@@ -115,7 +123,8 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
     let marketingCostsThisYear = 0;
     newClients.forEach(channel => {
         const monthsOfActivity = getMonthsOfActivity(channel.startMonth);
-        marketingCostsThisYear += channel.monthlyMarketingInvestment * monthsOfActivity;
+        const effectiveMonthlyInvestment = channel.monthlyMarketingInvestment * Math.pow(1 + (general.annualNewRevenueGrowthRate || 0) / 100, year - 1);
+        marketingCostsThisYear += effectiveMonthlyInvestment * monthsOfActivity;
     });
     marketingCostsThisYear *= inflationFactor;
 
@@ -130,15 +139,21 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
     // --- CALCULATIONS ---
     const ebitda = totalRevenues - (personnelCostThisYear + fixedCostsThisYear + variableCostsThisYear + marketingCostsThisYear);
     const ebit = ebitda - (year <= 5 ? annualAmortization : 0);
-    const taxBase = ebit > 0 ? ebit : 0;
+
+    const interestExpenseThisYear = outstandingLoanBalance * ((general.loanInterestRate || 0) / 100);
+    const ebt = ebit - interestExpenseThisYear;
+    const taxBase = ebt > 0 ? ebt : 0;
     const taxes = taxBase * (general.iresRate / 100 + general.irapRate / 100);
-    const netProfit = ebit - taxes;
+    const netProfit = ebt - taxes;
+
+    const principalPaymentThisYear = (year * 12 <= general.loanDurationMonths && outstandingLoanBalance > 0) ? Math.min(annualPrincipalPayment, outstandingLoanBalance) : 0;
+    outstandingLoanBalance -= principalPaymentThisYear;
 
     return {
       year,
       revenues: totalRevenues,
       recoverableClientRevenues: recoverableRevenueThisYear,
-      newClientRevenues: cumulativeNewClientRevenue,
+      newClientRevenues: totalNewClientRevenueThisYear,
       directlyAcquiredClientRevenues: directlyAcquiredClientRevenuesThisYear,
       personnelCosts: personnelCostThisYear,
       fixedCosts: fixedCostsThisYear,
@@ -147,8 +162,11 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
       ebitda,
       amortization: year <= 5 ? annualAmortization : 0,
       ebit,
+      interestExpense: interestExpenseThisYear,
+      ebt,
       taxes,
       netProfit,
+      loanPrincipalRepayment: principalPaymentThisYear,
     };
   });
   

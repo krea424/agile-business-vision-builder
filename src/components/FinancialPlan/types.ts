@@ -1,4 +1,3 @@
-
 export interface GeneralAssumptions {
   companyName: string;
   timeHorizon: number;
@@ -125,8 +124,11 @@ export interface YearlyData {
   ebitda: number;
   amortization: number;
   ebit: number;
+  interestExpense: number;
+  ebt: number;
   taxes: number;
   netProfit: number;
+  loanPrincipalRepayment: number;
 }
 
 export interface CashFlowYearlyData {
@@ -139,6 +141,9 @@ export interface CashFlowYearlyData {
   capex: number;
   cashFlowFromInvesting: number;
   equityInjection: number;
+  loanProceeds: number;
+  loanPrincipalRepayment: number;
+  dividendsPaid: number;
   cashFlowFromFinancing: number;
   netCashFlow: number;
   startingCash: number;

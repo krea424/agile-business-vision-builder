@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,9 +14,8 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 interface Props {
   data: YearlyData[];
+  currency?: string;
 }
-
-const formatCurrency = (value: number) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
 
 const chartConfig = {
   revenues: {
@@ -28,7 +28,7 @@ const chartConfig = {
   },
 };
 
-export function IncomeStatement({ data }: Props) {
+export function IncomeStatement({ data, currency = 'EUR' }: Props) {
   if (!data || data.length === 0) {
     return (
         <Card>
@@ -39,6 +39,8 @@ export function IncomeStatement({ data }: Props) {
         </Card>
     );
   }
+
+  const formatCurrency = (value: number) => new Intl.NumberFormat('it-IT', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
 
   const tableHeaders = ["Voce", ...data.map(d => `Anno ${d.year}`)];
   const rows: { label: string; key: keyof YearlyData; isBold?: boolean; isHighlighted?: boolean }[] = [
@@ -53,6 +55,8 @@ export function IncomeStatement({ data }: Props) {
     { label: "EBITDA", key: 'ebitda', isBold: true },
     { label: "Ammortamenti", key: 'amortization' },
     { label: "EBIT (Utile Operativo)", key: 'ebit', isBold: true },
+    { label: "(-) Oneri Finanziari", key: 'interestExpense' },
+    { label: "Utile ante imposte (EBT)", key: 'ebt', isBold: true },
     { label: "Imposte (IRES + IRAP)", key: 'taxes' },
     { label: "Utile Netto", key: 'netProfit', isBold: true, isHighlighted: true },
   ];

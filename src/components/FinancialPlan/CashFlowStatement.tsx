@@ -14,9 +14,8 @@ import { Line, LineChart, CartesianGrid, XAxis, YAxis, ReferenceLine } from "rec
 
 interface Props {
   data: CashFlowYearlyData[];
+  currency?: string;
 }
-
-const formatCurrency = (value: number) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
 
 const chartConfig = {
   endingCash: {
@@ -25,7 +24,7 @@ const chartConfig = {
   },
 };
 
-export function CashFlowStatement({ data }: Props) {
+export function CashFlowStatement({ data, currency = 'EUR' }: Props) {
   if (!data || data.length === 0) {
     return (
         <Card>
@@ -37,6 +36,8 @@ export function CashFlowStatement({ data }: Props) {
     );
   }
 
+  const formatCurrency = (value: number) => new Intl.NumberFormat('it-IT', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+
   const tableHeaders = ["Voce", ...data.map(d => `Anno ${d.year}`)];
   const rows: { label: string; key: keyof CashFlowYearlyData; isBold?: boolean; isHighlighted?: boolean; isPositive?: boolean }[] = [
     { label: "Utile Netto", key: 'netProfit' },
@@ -47,6 +48,9 @@ export function CashFlowStatement({ data }: Props) {
     { label: "(-) Investimenti (CapEx)", key: 'capex' },
     { label: "Flusso di Cassa da Attività di Investimento (B)", key: 'cashFlowFromInvesting', isBold: true },
     { label: "(+) Apporto Capitale Proprio (Equity)", key: 'equityInjection', isPositive: true },
+    { label: "(+) Accensione Finanziamenti", key: 'loanProceeds', isPositive: true },
+    { label: "(-) Rimborso Quota Capitale Finanziamenti", key: 'loanPrincipalRepayment' },
+    { label: "(-) Pagamento Dividendi", key: 'dividendsPaid' },
     { label: "Flusso di Cassa da Attività Finanziaria (C)", key: 'cashFlowFromFinancing', isBold: true },
     { label: "Flusso di Cassa Netto del Periodo", key: 'netCashFlow', isBold: true },
     { label: "Cassa Iniziale", key: 'startingCash' },
@@ -106,13 +110,13 @@ export function CashFlowStatement({ data }: Props) {
                       let colorClass = '';
 
                       if (typeof value === 'number' && value !== 0) {
-                        const standardColorRows: (keyof CashFlowYearlyData)[] = ['netProfit', 'grossOperatingCashFlow', 'cashFlowFromOperations', 'cashFlowFromInvesting', 'cashFlowFromFinancing', 'netCashFlow', 'startingCash', 'endingCash', 'amortization', 'equityInjection'];
-                        const invertedColorRows: (keyof CashFlowYearlyData)[] = ['changeInWorkingCapital', 'capex'];
+                        const standardColorRows: (keyof CashFlowYearlyData)[] = ['netProfit', 'grossOperatingCashFlow', 'cashFlowFromOperations', 'cashFlowFromInvesting', 'cashFlowFromFinancing', 'netCashFlow', 'startingCash', 'endingCash', 'amortization', 'equityInjection', 'loanProceeds'];
+                        const invertedColorRows: (keyof CashFlowYearlyData)[] = ['changeInWorkingCapital', 'capex', 'loanPrincipalRepayment', 'dividendsPaid'];
                         
                         if (standardColorRows.includes(row.key)) {
-                          colorClass = value > 0 ? 'text-green-600' : 'text-red-600';
+                          colorClass = value >= 0 ? 'text-green-600' : 'text-red-600';
                         } else if (invertedColorRows.includes(row.key)) {
-                          colorClass = value > 0 ? 'text-red-600' : 'text-green-600';
+                          colorClass = value < 0 ? 'text-red-600' : 'text-green-600';
                         }
                       }
 
