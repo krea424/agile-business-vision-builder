@@ -87,57 +87,69 @@ const Index = () => {
 
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <header className="mb-8">
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900">Financial Sustainability Plan</h1>
-        <p className="mt-2 text-lg text-gray-600">Il suo simulatore di volo per testare le decisioni strategiche.</p>
-      </header>
-      
-      <Accordion type="single" collapsible className="w-full" defaultValue='item-1'>
-        <AccordionItem value="item-1">
-          <AccordionTrigger className="text-xl font-semibold">1. Ipotesi Generali</AccordionTrigger>
-          <AccordionContent>
-            <GeneralAssumptions data={planData.general} setData={setGeneral} />
-          </AccordionContent>
-        </AccordionItem>
+    <div className="min-h-screen w-full bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">
+      <div className="container mx-auto p-4 md:p-8 lg:p-12">
+        <header className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">Financial Sustainability Plan</h1>
+          <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">Il suo simulatore di volo per testare le decisioni strategiche.</p>
+        </header>
+        
+        <Accordion type="single" collapsible className="w-full space-y-6" defaultValue='item-1'>
+          <AccordionItem value="item-1" className="border-none overflow-hidden rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold px-6 py-4 hover:no-underline data-[state=open]:border-b">
+              1. Ipotesi Generali
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6">
+              <GeneralAssumptions data={planData.general} setData={setGeneral} />
+            </AccordionContent>
+          </AccordionItem>
 
-        <AccordionItem value="item-2">
-          <AccordionTrigger className="text-xl font-semibold">2. Ipotesi Ricavi</AccordionTrigger>
-          <AccordionContent className="space-y-6">
-            <RecoverableClients data={planData.recoverableClients} setData={setRecoverableClients} />
-            <NewClients data={planData.newClients} setData={setNewClients} />
-          </AccordionContent>
-        </AccordionItem>
+          <AccordionItem value="item-2" className="border-none overflow-hidden rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold px-6 py-4 hover:no-underline data-[state=open]:border-b">
+              2. Ipotesi Ricavi
+            </AccordionTrigger>
+            <AccordionContent className="space-y-6 px-6 pb-6">
+              <RecoverableClients data={planData.recoverableClients} setData={setRecoverableClients} />
+              <NewClients data={planData.newClients} setData={setNewClients} />
+            </AccordionContent>
+          </AccordionItem>
 
-        <AccordionItem value="item-3">
-          <AccordionTrigger className="text-xl font-semibold">3. Ipotesi Costi</AccordionTrigger>
-          <AccordionContent className="space-y-6">
-            <PersonnelCosts data={planData.personnelCosts} setData={setPersonnelCosts} />
-            <OperationalInvestments 
-                fixedCosts={planData.fixedCosts}
-                variableCosts={planData.variableCosts}
-                initialInvestments={planData.initialInvestments}
-                setFixedCosts={setFixedCosts}
-                setVariableCosts={setVariableCosts}
-                setInitialInvestments={setInitialInvestments}
-            />
-          </AccordionContent>
-        </AccordionItem>
+          <AccordionItem value="item-3" className="border-none overflow-hidden rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold px-6 py-4 hover:no-underline data-[state=open]:border-b">
+              3. Ipotesi Costi
+            </AccordionTrigger>
+            <AccordionContent className="space-y-6 px-6 pb-6">
+              <PersonnelCosts data={planData.personnelCosts} setData={setPersonnelCosts} />
+              <OperationalInvestments 
+                  fixedCosts={planData.fixedCosts}
+                  variableCosts={planData.variableCosts}
+                  initialInvestments={planData.initialInvestments}
+                  setFixedCosts={setFixedCosts}
+                  setVariableCosts={setVariableCosts}
+                  setInitialInvestments={setInitialInvestments}
+              />
+            </AccordionContent>
+          </AccordionItem>
 
-        <AccordionItem value="item-4">
-          <AccordionTrigger className="text-xl font-semibold">4. Conto Economico Proiettato</AccordionTrigger>
-          <AccordionContent>
-            <IncomeStatement data={financialSummary} />
-          </AccordionContent>
-        </AccordionItem>
+          <AccordionItem value="item-4" className="border-none overflow-hidden rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold px-6 py-4 hover:no-underline data-[state=open]:border-b">
+              4. Conto Economico Proiettato
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6">
+              <IncomeStatement data={financialSummary} />
+            </AccordionContent>
+          </AccordionItem>
 
-        <AccordionItem value="item-5">
-          <AccordionTrigger className="text-xl font-semibold">5. Rendiconto Finanziario Proiettato (Flusso di Cassa)</AccordionTrigger>
-          <AccordionContent>
-            <CashFlowStatement data={cashFlowSummary} />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+          <AccordionItem value="item-5" className="border-none overflow-hidden rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="text-lg md:text-xl font-semibold px-6 py-4 hover:no-underline data-[state=open]:border-b">
+              5. Rendiconto Finanziario Proiettato (Flusso di Cassa)
+            </AccordionTrigger>
+            <AccordionContent className="px-6 pb-6">
+              <CashFlowStatement data={cashFlowSummary} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
     </div>
   );
 };
