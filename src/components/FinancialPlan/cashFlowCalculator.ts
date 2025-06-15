@@ -1,4 +1,3 @@
-
 import { FinancialPlanState, YearlyData, CashFlowYearlyData } from './types';
 
 export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStatement: YearlyData[]): CashFlowYearlyData[] {
@@ -9,7 +8,12 @@ export function calculateCashFlowSummary(plan: FinancialPlanState, incomeStateme
   const { general, initialInvestments } = plan;
   const cashFlowSummary: CashFlowYearlyData[] = [];
 
-  const totalInvestment = initialInvestments.reduce((sum, item) => sum + item.cost, 0);
+  const totalInvestment = initialInvestments.reduce((total, item) => {
+    const itemCost = item.subItems && item.subItems.length > 0
+      ? item.subItems.reduce((sum, sub) => sum + sub.cost, 0)
+      : item.cost;
+    return total + itemCost;
+  }, 0);
 
   let previousYearEndingCash = 0;
   let previousYearAccountsReceivable = 0;

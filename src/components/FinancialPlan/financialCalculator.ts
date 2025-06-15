@@ -1,4 +1,3 @@
-
 import { FinancialPlanState, YearlyData } from './types';
 
 export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[] {
@@ -9,7 +8,12 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
   
   const years = Array.from({ length: general.timeHorizon }, (_, i) => i + 1);
   
-  const totalInvestment = initialInvestments.reduce((sum, item) => sum + item.cost, 0);
+  const totalInvestment = initialInvestments.reduce((total, item) => {
+    const itemCost = item.subItems && item.subItems.length > 0
+        ? item.subItems.reduce((sum, sub) => sum + sub.cost, 0)
+        : item.cost;
+    return total + itemCost;
+  }, 0);
   const annualAmortization = totalInvestment / 5; // Assuming 5-year amortization period
 
   const monthMap: { [key: string]: number } = { gen: 1, feb: 2, mar: 3, apr: 4, mag: 5, giu: 6, lug: 7, ago: 8, set: 9, ott: 10, nov: 11, dic: 12 };
@@ -101,7 +105,10 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
     let fixedCostsThisYear = 0;
     fixedCosts.forEach(item => {
         const monthsOfActivity = getMonthsOfActivity(item.startMonth);
-        fixedCostsThisYear += item.monthlyCost * monthsOfActivity;
+        const totalMonthlyCost = item.subItems && item.subItems.length > 0
+            ? item.subItems.reduce((sum, sub) => sum + sub.monthlyCost, 0)
+            : item.monthlyCost;
+        fixedCostsThisYear += totalMonthlyCost * monthsOfActivity;
     });
     fixedCostsThisYear *= inflationFactor;
     
@@ -112,7 +119,13 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
     });
     marketingCostsThisYear *= inflationFactor;
 
-    const variableCostsThisYear = variableCosts.reduce((sum, item) => sum + (item.percentageOnRevenue / 100), 0) * totalRevenues;
+    const totalVariablePercentage = variableCosts.reduce((total, item) => {
+        const itemPercentage = item.subItems && item.subItems.length > 0
+            ? item.subItems.reduce((sum, sub) => sum + sub.percentageOnRevenue, 0)
+            : item.percentageOnRevenue;
+        return total + itemPercentage;
+    }, 0);
+    const variableCostsThisYear = (totalVariablePercentage / 100) * totalRevenues;
     
     // --- CALCULATIONS ---
     const ebitda = totalRevenues - (personnelCostThisYear + fixedCostsThisYear + variableCostsThisYear + marketingCostsThisYear);
