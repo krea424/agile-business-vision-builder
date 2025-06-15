@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
@@ -115,7 +116,7 @@ export function PersonnelCosts({ data, setData }: Props) {
               <TableRow>
                 <TableHead className="min-w-[150px]">Ruolo</TableHead>
                 <TableHead className="min-w-[200px]">Tipo Contratto</TableHead>
-                <TableHead className="text-right">Mese Inizio</TableHead>
+                <TableHead className="text-right">Mese Avvio</TableHead>
                 <TableHead className="text-right">Mese Fine</TableHead>
                 <TableHead className="min-w-[150px] text-right">Stipendio Netto Mensile (€)</TableHead>
                 <TableHead className="min-w-[120px] text-right">Coeff. per RAL</TableHead>

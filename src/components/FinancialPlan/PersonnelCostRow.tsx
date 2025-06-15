@@ -48,7 +48,7 @@ export function PersonnelCostRow({ item, index, onInputChange, onContractTypeCha
           </SelectContent>
         </Select>
       </TableCell>
-      <TableCell><Input type="number" value={item.hiringMonth} onChange={e => onInputChange(index, 'hiringMonth', Number(e.target.value))} className="text-right" /></TableCell>
+      <TableCell><Input type="number" value={item.hiringMonth} onChange={e => onInputChange(index, 'hiringMonth', Number(e.target.value) || 1)} className="text-right" /></TableCell>
       <TableCell><Input type="number" value={item.endMonth || ''} onChange={e => onInputChange(index, 'endMonth', Number(e.target.value) || undefined)} className="text-right" placeholder="Opz." /></TableCell>
       <TableCell>
         {isDipendente ? (
