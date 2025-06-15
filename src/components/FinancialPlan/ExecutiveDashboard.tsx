@@ -1,5 +1,4 @@
 
-```tsx
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FinancialPlanState } from '@/components/FinancialPlan/types';
@@ -32,6 +31,11 @@ const KpiCard: React.FC<KpiCardProps> = ({ title, value, description, icon: Icon
   </Card>
 );
 
+const formatCurrency = (value: number | undefined) => {
+  if (value === undefined || value === null) return "N/A";
+  return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
+}
+
 export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState }) => {
   const navigate = useNavigate();
 
@@ -40,11 +44,6 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
   const dashboardData = useMemo(() => calculateDashboardData(planData, financialSummary, cashFlowSummary), [planData, financialSummary, cashFlowSummary]);
   
   const { kpis, monthlyChartData } = dashboardData;
-
-  const formatCurrency = (value: number | undefined) => {
-    if (value === undefined || value === null) return "N/A";
-    return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
-  }
 
   const automatedInsights = useMemo(() => {
     const insights: React.ReactNode[] = [];
@@ -62,7 +61,8 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Rischio di Liquidità</AlertTitle>
           <AlertDescription>
-            Il capitale versato ({formatCurrency(equityInjection)}) non basta a coprire il fabbisogno di {formatCurrency(kpis.peakFundingRequirement)}. 
+            Il capitale versato ({formatCurrency(equityInjection)}) non basta a coprire il fabbisogno di {formatCurrency(kpis.peakFundingRequirement)}.
+            {' '}
             Necessario un ulteriore finanziamento di {formatCurrency(shortfall)} o una revisione dei costi.
           </AlertDescription>
         </Alert>
@@ -94,7 +94,7 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
                     <Info className="h-4 w-4" />
                     <AlertTitle>Insight: Struttura dei Costi</AlertTitle>
                     <AlertDescription>
-                        I costi del personale rappresentano il {(personnelCostRatio * 100).toFixed(0)}% dei costi totali. Valutare l'impatto di aumenti salariali inattesi.
+                        I costi del personale rappresentano il {(personnelCostRatio * 100).toFixed(0)}% dei costi totali. Valutare l&apos;impatto di aumenti salariali inattesi.
                     </AlertDescription>
                 </Alert>
             );
@@ -116,7 +116,7 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
                         <AlertTriangle className="h-4 w-4" />
                         <AlertTitle>Rischio di Sostenibilità</AlertTitle>
                         <AlertDescription>
-                            I costi ({ (costGrowth * 100).toFixed(1) }%) crescono più dei ricavi ({ (revenueGrowth * 100).toFixed(1) }%). Rivedere il pricing o l'efficienza dei costi.
+                            I costi ({ (costGrowth * 100).toFixed(1) }%) crescono più dei ricavi ({ (revenueGrowth * 100).toFixed(1) }%). Rivedere il pricing o l&apos;efficienza dei costi.
                         </AlertDescription>
                     </Alert>
                 );
@@ -125,7 +125,7 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
     }
 
     return insights;
-  }, [planData, kpis, financialSummary, formatCurrency]);
+  }, [planData, kpis, financialSummary]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">
@@ -185,4 +185,3 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
     </div>
   );
 };
-```
