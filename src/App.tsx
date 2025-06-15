@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import PlanPage from "./pages/PlanPage";
 import ScenarioReport from "./pages/ScenarioReport";
 import NotFound from "./pages/NotFound";
+import SensitivityAnalysisPage from "./pages/SensitivityAnalysisPage";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/plan" element={<PlanPage />} />
             <Route path="/report" element={<ScenarioReport />} />
+            <Route path="/sensitivity" element={<SensitivityAnalysisPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

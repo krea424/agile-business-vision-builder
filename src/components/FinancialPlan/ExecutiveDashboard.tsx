@@ -8,7 +8,7 @@ import { calculateDashboardData, Insight, DashboardData } from './dashboardCalcu
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend, Bar, Line } from 'recharts';
-import { Edit, Banknote, Landmark, AlertTriangle, ArrowDown, CalendarCheck, Percent, Target, Info } from 'lucide-react';
+import { Edit, Banknote, Landmark, AlertTriangle, ArrowDown, CalendarCheck, Percent, Target, Info, BarChart } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type KpiCardProps = {
@@ -69,9 +69,14 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">Executive Summary</h1>
             <p className="mt-2 text-lg text-muted-foreground">{planData.general.scenarioName}</p>
           </div>
-          <Button onClick={() => navigate('/plan')}>
-            <Edit className="mr-2 h-4 w-4" /> Modifica Piano
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate('/plan')}>
+              <Edit className="mr-2 h-4 w-4" /> Modifica Piano
+            </Button>
+            <Button onClick={() => navigate('/sensitivity')}>
+              <BarChart className="mr-2 h-4 w-4" /> Analisi di Sensitività
+            </Button>
+          </div>
         </header>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
