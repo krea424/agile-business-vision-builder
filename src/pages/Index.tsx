@@ -1,5 +1,6 @@
+
 import { useState, useMemo } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { FinancialPlanState } from '@/components/FinancialPlan/types';
 import { GeneralAssumptions } from '@/components/FinancialPlan/GeneralAssumptions';
 import { RecoverableClients } from '@/components/FinancialPlan/RecoverableClients';
@@ -10,6 +11,14 @@ import { IncomeStatement } from '@/components/FinancialPlan/IncomeStatement';
 import { calculateFinancialSummary } from '@/components/FinancialPlan/financialCalculator';
 import { CashFlowStatement } from '@/components/FinancialPlan/CashFlowStatement';
 import { calculateCashFlowSummary } from '@/components/FinancialPlan/cashFlowCalculator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 const initialPlanState: FinancialPlanState = {
   general: {
@@ -57,6 +66,7 @@ const initialPlanState: FinancialPlanState = {
 
 const Index = () => {
   const [planData, setPlanData] = useState<FinancialPlanState>(initialPlanState);
+  const [activeTab, setActiveTab] = useState('general');
 
   const setGeneral = (data: FinancialPlanState['general']) => setPlanData(prev => ({...prev, general: data}));
   const setRecoverableClients = (data: FinancialPlanState['recoverableClients']) => setPlanData(prev => ({...prev, recoverableClients: data}));
@@ -93,15 +103,24 @@ const Index = () => {
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">Il suo simulatore di volo per testare le decisioni strategiche.</p>
         </header>
         
-        <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-6">
-            <TabsTrigger value="general">1. Generali</TabsTrigger>
-            <TabsTrigger value="revenues">2. Ricavi</TabsTrigger>
-            <TabsTrigger value="costs">3. Costi</TabsTrigger>
-            <TabsTrigger value="income">4. C. Economico</TabsTrigger>
-            <TabsTrigger value="cashflow">5. Flusso di Cassa</TabsTrigger>
-          </TabsList>
+        <div className="flex justify-start mb-6">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Menu className="mr-2 h-4 w-4" /> Seleziona Sezione
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onSelect={() => setActiveTab('general')}>1. Generali</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setActiveTab('revenues')}>2. Ricavi</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setActiveTab('costs')}>3. Costi</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setActiveTab('income')}>4. C. Economico</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setActiveTab('cashflow')}>5. Flusso di Cassa</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsContent value="general">
             <GeneralAssumptions data={planData.general} setData={setGeneral} />
           </TabsContent>
