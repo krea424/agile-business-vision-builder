@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FinancialPlanState } from '@/components/FinancialPlan/types';
@@ -9,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ComposedChart, XAxis, YAxis, CartesianGrid, Bar, Line } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
-import { Edit, Banknote, Landmark, AlertTriangle, ArrowDown, CalendarCheck, Percent, Target, Info, BarChart, FilePresentation } from 'lucide-react';
+import { Edit, Banknote, Landmark, AlertTriangle, ArrowDown, CalendarCheck, Percent, Target, Info, BarChart, Presentation } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type KpiCardProps = {
@@ -94,7 +93,7 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
               <BarChart className="mr-2 h-4 w-4" /> Analisi di Sensitività
             </Button>
              <Button variant="outline" onClick={() => navigate('/report', { state: { planData, financialSummary, cashFlowSummary, dashboardData, autoPrint: false } })}>
-                <FilePresentation className="mr-2 h-4 w-4" /> Visualizza Report
+                <Presentation className="mr-2 h-4 w-4" /> Visualizza Report
             </Button>
           </div>
         </header>
@@ -181,4 +180,3 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
     </div>
   );
 };
-

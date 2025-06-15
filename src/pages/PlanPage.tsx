@@ -187,14 +187,14 @@ const exportToPptx = (planData: FinancialPlanState, dashboardData: any) => {
                 type: 'line',
                 data: chartData.slice(1, 2),
                 options: { lineSmooth: true, lineSize: 3, lineDataSymbol: 'circle', lineDataSymbolSize: 6,
-                lineColor: 'F6B26B', // Orange for EBITDA
+                color: 'F6B26B', // Orange for EBITDA
               },
             },
             {
                 type: 'line',
                 data: chartData.slice(2, 3),
                 options: { lineSmooth: true, lineSize: 3, lineDataSymbol: 'triangle', lineDataSymbolSize: 6, secondaryValAxis: true, valAxisTitle: 'Cassa (€k)', valAxisLabelFormatCode: '#,##0',
-                lineColor: '6AA84F', // Green for Cassa
+                color: '6AA84F', // Green for Cassa
               },
             },
         ];
