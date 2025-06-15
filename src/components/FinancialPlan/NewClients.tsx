@@ -54,13 +54,13 @@ export function NewClients({ data, setData }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[150px]">Canale/Servizio</TableHead>
-              <TableHead className="min-w-[220px]">Investimento Marketing Mensile (€)</TableHead>
-              <TableHead className="min-w-[160px]">Lead / 100€ investiti</TableHead>
-              <TableHead className="min-w-[160px]">Tasso Conversione (%)</TableHead>
-              <TableHead className="min-w-[220px]">Valore Medio Contratto Annuo (€)</TableHead>
-              <TableHead className="text-right min-w-[180px]">Mese Partenza (da inizio progetto)</TableHead>
-              <TableHead className="text-right min-w-[220px]">Ricavi Annui Ricorrenti Generati</TableHead>
+              <TableHead>Canale/Servizio</TableHead>
+              <TableHead>Invest. Mensile (€)</TableHead>
+              <TableHead>Lead / 100€</TableHead>
+              <TableHead>Tasso Conv. (%)</TableHead>
+              <TableHead>Valore Contratto (€)</TableHead>
+              <TableHead className="text-right">Mese Partenza</TableHead>
+              <TableHead className="text-right">Ricavo Annuo</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
