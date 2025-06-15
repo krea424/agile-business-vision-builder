@@ -153,24 +153,16 @@ export const calculateDashboardData = (plan: FinancialPlanState, yearlyFinancial
         };
     }
     
-    const { general, newClients, directlyAcquiredClients } = plan;
+    const { general } = plan;
 
     // --- LTV & CAC Calculations ---
     let totalNewClientsOverHorizon = 0;
     const totalMarketingCostsOverHorizon = yearlyFinancials.reduce((sum, year) => sum + year.marketingCosts, 0);
     let endingCustomers = general.initialCustomers || 0;
-    const churnRateDecimal = (general.churnRate || 0) / 100;
+    const churnRateDecimal = (general.customerChurnRate || 0) / 100;
 
     yearlyFinancials.forEach(yearData => {
-        const newClientsFromCampaignsInYear = newClients
-            .filter(c => c.startYear <= yearData.year)
-            .reduce((sum, campaign) => sum + ((campaign.investment || 0) / (campaign.costPerResult || 1)) * 12, 0);
-
-        const newClientsFromDirectInYear = directlyAcquiredClients
-            .filter(c => c.startYear <= yearData.year)
-            .reduce((sum, source) => sum + (source.clients || 0), 0);
-        
-        const totalNewClientsForYear = newClientsFromCampaignsInYear + newClientsFromDirectInYear;
+        const totalNewClientsForYear = (yearData.newContracts || 0) + (yearData.directlyAcquiredContracts || 0);
         totalNewClientsOverHorizon += totalNewClientsForYear;
         
         endingCustomers = endingCustomers * (1 - churnRateDecimal) + totalNewClientsForYear;

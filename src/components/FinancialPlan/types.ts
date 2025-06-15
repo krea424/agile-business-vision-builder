@@ -1,4 +1,3 @@
-
 export interface GeneralAssumptions {
   companyName: string;
   timeHorizon: number;
@@ -9,6 +8,7 @@ export interface GeneralAssumptions {
   equityInjection: number;
   daysToCollectReceivables: number;
   daysToPayPayables: number;
+  initialCustomers?: number;
 
   // Campi aggiunti
   scenarioName: string;
@@ -159,6 +159,8 @@ export interface YearlyData {
   ebitdaMargin: number;
   ebitMargin: number;
   netProfitMargin: number;
+  newContracts: number;
+  directlyAcquiredContracts: number;
 }
 
 export interface CashFlowYearlyData {

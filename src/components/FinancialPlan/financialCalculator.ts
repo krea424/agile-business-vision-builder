@@ -119,14 +119,18 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
           }
           if (year === chargeYear) {
               directlyAcquiredClientRevenuesThisYear += client.numberOfClients * client.annualContractValue;
+              directlyAcquiredContractsThisYear += client.numberOfClients;
           }
         } else { // ricorrente
           const annualRevenue = client.numberOfClients * client.monthlyContractValue * 12;
           directlyAcquiredClientRevenuesThisYear += (annualRevenue / 12) * monthsOfActivity;
-          if (monthsOfActivity > 0) directlyAcquiredContractsThisYear += client.numberOfClients * monthsOfActivity;
+          if (monthsOfActivity > 0) {
+            directlyAcquiredContractsThisYear += client.numberOfClients;
+          }
         }
       });
     }
+
     totalWeightedCollectionDaysNumerator += directlyAcquiredClientRevenuesThisYear * general.daysToCollectReceivables;
 
     let newClientRevenueGeneratedThisYear = 0;
@@ -282,6 +286,8 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
       ebitdaMargin,
       ebitMargin,
       netProfitMargin,
+      newContracts: newContractsThisYear,
+      directlyAcquiredContracts: directlyAcquiredContractsThisYear,
     });
   }
   
