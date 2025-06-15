@@ -76,7 +76,7 @@ const PlanPage = () => {
       return calculateDashboardData(planData, financialSummary, cashFlowSummary);
     } catch (error) {
       console.error("Error calculating dashboard data:", error);
-      return { kpis: {}, monthlyChartData: [], automatedInsights: [] };
+      return { kpis: null, monthlyChartData: [], automatedInsights: [] };
     }
   }, [planData, financialSummary, cashFlowSummary]);
 
