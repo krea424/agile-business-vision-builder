@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
@@ -151,10 +150,18 @@ export function PersonnelCosts({ data, setData }: Props) {
                     <TableCell><Input type="number" value={item.hiringMonth} onChange={e => handleInputChange(index, 'hiringMonth', Number(e.target.value))} className="text-right" /></TableCell>
                     <TableCell><Input type="number" value={item.endMonth || ''} onChange={e => handleInputChange(index, 'endMonth', Number(e.target.value) || undefined)} className="text-right" placeholder="Opz." /></TableCell>
                     <TableCell>
-                        {isDipendente && <Input type="number" value={item.monthlyNetSalary || ''} onChange={e => handleInputChange(index, 'monthlyNetSalary', Number(e.target.value))} className="text-right" placeholder="Netto mensile"/>}
+                        {isDipendente ? (
+                          <Input type="number" value={item.monthlyNetSalary || ''} onChange={e => handleInputChange(index, 'monthlyNetSalary', Number(e.target.value))} className="text-right" placeholder="Netto mensile"/>
+                        ) : (
+                          <Input disabled className="text-right bg-gray-100" value="N/A" />
+                        )}
                     </TableCell>
                     <TableCell>
-                        {isDipendente && <Input type="number" step="0.1" value={item.ralCoefficient || ''} onChange={e => handleInputChange(index, 'ralCoefficient', Number(e.target.value))} className="text-right" placeholder="Coeff. RAL"/>}
+                        {isDipendente ? (
+                          <Input type="number" step="0.1" value={item.ralCoefficient || ''} onChange={e => handleInputChange(index, 'ralCoefficient', Number(e.target.value))} className="text-right" placeholder="Coeff. RAL"/>
+                        ) : (
+                          <Input disabled className="text-right bg-gray-100" value="N/A" />
+                        )}
                     </TableCell>
                     <TableCell>
                         {isDipendente ? (
@@ -164,7 +171,11 @@ export function PersonnelCosts({ data, setData }: Props) {
                         )}
                     </TableCell>
                     <TableCell>
-                        {isDipendente && <Input type="number" step="0.1" value={item.companyCostCoefficient || ''} onChange={e => handleInputChange(index, 'companyCostCoefficient', Number(e.target.value))} className="text-right" />}
+                        {isDipendente ? (
+                          <Input type="number" step="0.1" value={item.companyCostCoefficient || ''} onChange={e => handleInputChange(index, 'companyCostCoefficient', Number(e.target.value))} className="text-right" />
+                        ) : (
+                          <Input disabled className="text-right bg-gray-100" value="N/A" />
+                        )}
                     </TableCell>
                     <TableCell>
                         <Input type="text" value={formatCurrency(costoAnnuoAzienda)} readOnly className="text-right bg-gray-100" />
@@ -173,10 +184,14 @@ export function PersonnelCosts({ data, setData }: Props) {
                         <Input type="text" value={formatCurrency(costoMensileAzienda)} readOnly className="text-right bg-gray-100" />
                     </TableCell>
                     <TableCell>
-                        {isDipendente && <Input type="number" value={item.annualSalaryIncrease || ''} onChange={e => handleInputChange(index, 'annualSalaryIncrease', Number(e.target.value))} className="text-right" />}
+                        {isDipendente ? (
+                          <Input type="number" value={item.annualSalaryIncrease || ''} onChange={e => handleInputChange(index, 'annualSalaryIncrease', Number(e.target.value))} className="text-right" />
+                        ) : (
+                          <Input disabled className="text-right bg-gray-100" value="N/A" />
+                        )}
                     </TableCell>
                     <TableCell>
-                        {isDipendente && (
+                        {isDipendente ? (
                             <div className="flex gap-2">
                             <Select value={item.bonusType || 'Nessuno'} onValueChange={(value) => handleInputChange(index, 'bonusType', value)}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -191,6 +206,8 @@ export function PersonnelCosts({ data, setData }: Props) {
                                 <Input type="number" value={item.bonusValue || ''} onChange={e => handleInputChange(index, 'bonusValue', Number(e.target.value))} className="w-[80px]" />
                             }
                             </div>
+                        ) : (
+                            <Input disabled className="bg-gray-100 w-full" value="N/A" />
                         )}
                     </TableCell>
                     <TableCell><Button variant="ghost" size="icon" onClick={() => removeRow(item.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button></TableCell>
