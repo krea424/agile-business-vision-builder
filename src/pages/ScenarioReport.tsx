@@ -176,8 +176,8 @@ const ScenarioReport = () => {
                         </Table>
                     </Section>
 
-                    <Section title="4. Conto Economico Previsionale"><IncomeStatement data={financialSummary} currency={planData.general.currency} /></Section>
-                    <Section title="5. Flusso di Cassa Previsionale"><CashFlowStatement data={cashFlowSummary} currency={planData.general.currency} /></Section>
+                    <Section title="4. Conto Economico Previsionale"><IncomeStatement data={financialSummary} /></Section>
+                    <Section title="5. Flusso di Cassa Previsionale"><CashFlowStatement data={cashFlowSummary} /></Section>
                 </main>
             </div>
         </div>
