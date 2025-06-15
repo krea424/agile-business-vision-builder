@@ -120,8 +120,22 @@ const ScenarioReport = () => {
                     
                     <Section title="3.1 Costi: Personale">
                         <Table>
-                            <TableHeader><TableRow><TableHead>Ruolo</TableHead><TableHead>RAL</TableHead><TableHead>Costo Azienda Annuo</TableHead><TableHead>Costo Effettivo Anno 1</TableHead></TableRow></TableHeader>
-                            <TableBody>{planData.personnelCosts.map(c => <TableRow key={c.id}><TableCell>{c.role}</TableCell><TableCell>{formatCurrency(c.annualGrossSalary)}</TableCell><TableCell>{formatCurrency(calculatePersonnelAnnualCost(c))}</TableCell><TableCell>{formatCurrency(calculatePersonnelFirstYearCost(c))}</TableCell></TableRow>)}</TableBody>
+                            <TableHeader><TableRow>
+                                <TableHead>Ruolo</TableHead>
+                                <TableHead>Stipendio Netto Mensile</TableHead>
+                                <TableHead>Coeff. per RAL</TableHead>
+                                <TableHead>RAL</TableHead>
+                                <TableHead>Costo Azienda Annuo</TableHead>
+                                <TableHead>Costo Effettivo Anno 1</TableHead>
+                            </TableRow></TableHeader>
+                            <TableBody>{planData.personnelCosts.map((c: PersonnelCost) => <TableRow key={c.id}>
+                                <TableCell>{c.role}</TableCell>
+                                <TableCell>{formatCurrency(c.netMonthlySalary || 0)}</TableCell>
+                                <TableCell>{new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 3 }).format(c.ralCoefficient || 0)}</TableCell>
+                                <TableCell>{formatCurrency(c.annualGrossSalary)}</TableCell>
+                                <TableCell>{formatCurrency(calculatePersonnelAnnualCost(c))}</TableCell>
+                                <TableCell>{formatCurrency(calculatePersonnelFirstYearCost(c))}</TableCell>
+                            </TableRow>)}</TableBody>
                         </Table>
                     </Section>
 
@@ -176,8 +190,8 @@ const ScenarioReport = () => {
                         </Table>
                     </Section>
 
-                    <Section title="4. Conto Economico Previsionale"><IncomeStatement data={financialSummary} currency={planData.general.currency} /></Section>
-                    <Section title="5. Flusso di Cassa Previsionale"><CashFlowStatement data={cashFlowSummary} currency={planData.general.currency} /></Section>
+                    <Section title="4. Conto Economico Previsionale"><IncomeStatement data={financialSummary} /></Section>
+                    <Section title="5. Flusso di Cassa Previsionale"><CashFlowStatement data={cashFlowSummary} /></Section>
                 </main>
             </div>
         </div>

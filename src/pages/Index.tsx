@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -58,13 +57,13 @@ const initialPlanState: FinancialPlanState = {
   ],
   directlyAcquiredClients: [],
   personnelCosts: [
-    { id: '1', role: 'Visurista Esperto 1', annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
-    { id: '2', role: 'Visurista Esperto 2', annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
-    { id: '3', role: 'Visurista Esperto 3', annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
-    { id: '4', role: 'Visurista Esperto 4', annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 4 },
-    { id: '5', role: 'Amministrativo', annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
-    { id: '6', role: 'Direttore Operativo (Founder)', annualGrossSalary: 18000, companyCostCoefficient: 1.0, hiringMonth: 7 },
-    { id: '7', role: 'Commerciale (Founder)', annualGrossSalary: 18000, companyCostCoefficient: 1.0, hiringMonth: 7 },
+    { id: '1', role: 'Visurista Esperto 1', netMonthlySalary: 1600, ralCoefficient: 17.375, annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
+    { id: '2', role: 'Visurista Esperto 2', netMonthlySalary: 1600, ralCoefficient: 17.375, annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
+    { id: '3', role: 'Visurista Esperto 3', netMonthlySalary: 1600, ralCoefficient: 17.375, annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
+    { id: '4', role: 'Visurista Esperto 4', netMonthlySalary: 1600, ralCoefficient: 17.375, annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 4 },
+    { id: '5', role: 'Amministrativo', netMonthlySalary: 1600, ralCoefficient: 17.375, annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
+    { id: '6', role: 'Direttore Operativo (Founder)', netMonthlySalary: 1200, ralCoefficient: 15, annualGrossSalary: 18000, companyCostCoefficient: 1.0, hiringMonth: 7 },
+    { id: '7', role: 'Commerciale (Founder)', netMonthlySalary: 1200, ralCoefficient: 15, annualGrossSalary: 18000, companyCostCoefficient: 1.0, hiringMonth: 7 },
   ],
   fixedCosts: [
     { id: '1', name: 'Affitto ufficio', monthlyCost: 1000, startMonth: 1 },

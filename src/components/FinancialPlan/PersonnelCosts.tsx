@@ -15,13 +15,21 @@ interface Props {
 export function PersonnelCosts({ data, setData }: Props) {
   
   const handleInputChange = (index: number, field: keyof PersonnelCost, value: string | number) => {
-    const updatedData = [...data];
-    updatedData[index] = { ...updatedData[index], [field]: value };
+    const updatedData = data.map((item, i) => {
+        if (i === index) {
+            const updatedItem = { ...item, [field]: value };
+            if (field === 'netMonthlySalary' || field === 'ralCoefficient') {
+                updatedItem.annualGrossSalary = Number(updatedItem.netMonthlySalary || 0) * Number(updatedItem.ralCoefficient || 0);
+            }
+            return updatedItem;
+        }
+        return item;
+    });
     setData(updatedData);
   };
 
   const addRow = () => {
-    setData([...data, { id: crypto.randomUUID(), role: '', annualGrossSalary: 0, companyCostCoefficient: 1.5, hiringMonth: 1 }]);
+    setData([...data, { id: crypto.randomUUID(), role: '', netMonthlySalary: 0, ralCoefficient: 17, annualGrossSalary: 0, companyCostCoefficient: 1.5, hiringMonth: 1 }]);
   };
 
   const removeRow = (id: string) => {
@@ -62,11 +70,13 @@ export function PersonnelCosts({ data, setData }: Props) {
           <TableHeader>
             <TableRow>
               <TableHead>Ruolo</TableHead>
+              <TableHead>Stipendio Netto Mensile (€)</TableHead>
+              <TableHead>Coeff. per RAL</TableHead>
               <TableHead>RAL (€)</TableHead>
-              <TableHead>Coeff. Costo</TableHead>
+              <TableHead>Coeff. Costo Az.</TableHead>
               <TableHead>Mese Assunzione</TableHead>
-              <TableHead>Costo Annuo</TableHead>
-              <TableHead>Costo Mese</TableHead>
+              <TableHead>Costo Annuo Az.</TableHead>
+              <TableHead>Costo Mese Az.</TableHead>
               <TableHead>Costo Anno 1</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
@@ -85,7 +95,9 @@ export function PersonnelCosts({ data, setData }: Props) {
               return (
               <TableRow key={item.id}>
                 <TableCell><Input value={item.role} onChange={e => handleInputChange(index, 'role', e.target.value)} placeholder="Es. Founder 1" /></TableCell>
-                <TableCell><Input type="number" value={item.annualGrossSalary} onChange={e => handleInputChange(index, 'annualGrossSalary', Number(e.target.value))} className="text-right" /></TableCell>
+                <TableCell><Input type="number" value={item.netMonthlySalary} onChange={e => handleInputChange(index, 'netMonthlySalary', Number(e.target.value))} className="text-right" /></TableCell>
+                <TableCell><Input type="number" step="0.01" value={item.ralCoefficient} onChange={e => handleInputChange(index, 'ralCoefficient', Number(e.target.value))} className="text-right" /></TableCell>
+                <TableCell><Input type="number" value={item.annualGrossSalary} readOnly disabled className="text-right bg-muted/50 border-none" /></TableCell>
                 <TableCell><Input type="number" step="0.1" value={item.companyCostCoefficient} onChange={e => handleInputChange(index, 'companyCostCoefficient', Number(e.target.value))} className="text-right" /></TableCell>
                 <TableCell><Input type="number" value={item.hiringMonth} onChange={e => handleInputChange(index, 'hiringMonth', Number(e.target.value))} className="text-right" /></TableCell>
                 <TableCell className="text-right font-medium">{formatCurrency(annualCompanyCost)}</TableCell>
@@ -97,7 +109,7 @@ export function PersonnelCosts({ data, setData }: Props) {
           </TableBody>
           <TableFooter>
             <TableRow>
-                <TableCell colSpan={4}>
+                <TableCell colSpan={6}>
                     <Button variant="outline" size="sm" onClick={addRow}><PlusCircle className="h-4 w-4 mr-2" /> Aggiungi Ruolo</Button>
                 </TableCell>
                 <TableCell className="text-right font-bold">{formatCurrency(totalCompanyCost)}</TableCell>

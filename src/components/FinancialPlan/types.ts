@@ -61,6 +61,8 @@ export interface DirectlyAcquiredClient {
 export interface PersonnelCost {
   id: string;
   role: string;
+  netMonthlySalary: number;
+  ralCoefficient: number;
   annualGrossSalary: number;
   companyCostCoefficient: number;
   hiringMonth: number;
