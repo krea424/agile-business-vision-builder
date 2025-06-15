@@ -1,4 +1,3 @@
-
 import { FinancialPlanState, YearlyData, CashFlowYearlyData } from './types';
 
 // Simple IRR calculation using the Newton-Raphson method
@@ -42,6 +41,9 @@ export type KpiData = {
   enterpriseValue: number;
   breakEvenMonth: number | null;
   lowestCashPoint: { value: number; month: number; };
+  ltv: number;
+  cac: number;
+  ltvToCacRatio: number;
 };
 
 export type DashboardData = {
@@ -50,7 +52,7 @@ export type DashboardData = {
     automatedInsights: Insight[];
 };
 
-export const generateAutomatedInsights = (plan: FinancialPlanState, kpis: any, yearlyFinancials: YearlyData[]): Insight[] => {
+export const generateAutomatedInsights = (plan: FinancialPlanState, kpis: KpiData, yearlyFinancials: YearlyData[]): Insight[] => {
     const insights: Insight[] = [];
 
     if (!plan || !kpis || !yearlyFinancials || yearlyFinancials.length === 0) {
@@ -121,6 +123,24 @@ export const generateAutomatedInsights = (plan: FinancialPlanState, kpis: any, y
         }
     }
 
+    if (kpis.ltvToCacRatio && kpis.cac > 0) {
+        if (kpis.ltvToCacRatio < 1) {
+            insights.push({
+                key: "ltv-cac-unprofitable",
+                variant: "destructive",
+                title: "Modello di Acquisizione Insostenibile",
+                description: `Il rapporto LTV:CAC è ${kpis.ltvToCacRatio.toFixed(1)}:1. Ogni nuovo cliente genera meno valore del suo costo di acquisizione. Rivedere urgentemente la strategia di marketing o il pricing.`
+            });
+        } else if (kpis.ltvToCacRatio < 3) {
+            insights.push({
+                key: "ltv-cac-warning",
+                variant: "default",
+                title: "Insight: Efficienza Acquisizione",
+                description: `Il rapporto LTV:CAC è ${kpis.ltvToCacRatio.toFixed(1)}:1. Un valore sano è generalmente considerato 3:1 o superiore. Ottimizzare i canali di acquisizione o lavorare sulla retention dei clienti.`
+            });
+        }
+    }
+
     return insights;
 };
 
@@ -133,7 +153,37 @@ export const calculateDashboardData = (plan: FinancialPlanState, yearlyFinancial
         };
     }
     
-    const { general } = plan;
+    const { general, newClients, directlyAcquiredClients } = plan;
+
+    // --- LTV & CAC Calculations ---
+    let totalNewClientsOverHorizon = 0;
+    const totalMarketingCostsOverHorizon = yearlyFinancials.reduce((sum, year) => sum + year.marketingCosts, 0);
+    let endingCustomers = general.initialCustomers || 0;
+    const churnRateDecimal = (general.churnRate || 0) / 100;
+
+    yearlyFinancials.forEach(yearData => {
+        const newClientsFromCampaignsInYear = newClients
+            .filter(c => c.startYear <= yearData.year)
+            .reduce((sum, campaign) => sum + ((campaign.investment || 0) / (campaign.costPerResult || 1)) * 12, 0);
+
+        const newClientsFromDirectInYear = directlyAcquiredClients
+            .filter(c => c.startYear <= yearData.year)
+            .reduce((sum, source) => sum + (source.clients || 0), 0);
+        
+        const totalNewClientsForYear = newClientsFromCampaignsInYear + newClientsFromDirectInYear;
+        totalNewClientsOverHorizon += totalNewClientsForYear;
+        
+        endingCustomers = endingCustomers * (1 - churnRateDecimal) + totalNewClientsForYear;
+    });
+
+    const cac = totalNewClientsOverHorizon > 0 ? totalMarketingCostsOverHorizon / totalNewClientsOverHorizon : 0;
+    
+    const lastYearFinancials = yearlyFinancials[yearlyFinancials.length - 1];
+    const revenueLastYear = lastYearFinancials.revenues;
+    const arpuLastYear = endingCustomers > 0 ? revenueLastYear / endingCustomers : 0;
+    const ltv = churnRateDecimal > 0 ? arpuLastYear / churnRateDecimal : 0;
+
+    const ltvToCacRatio = cac > 0 ? ltv / cac : 0;
 
     // --- Enterprise Value ---
     const lastYearEbitda = yearlyFinancials[yearlyFinancials.length - 1].ebitda;
@@ -217,6 +267,9 @@ export const calculateDashboardData = (plan: FinancialPlanState, yearlyFinancial
         enterpriseValue: enterpriseValue,
         breakEvenMonth: breakEvenMonth,
         lowestCashPoint: lowestCashPoint,
+        ltv,
+        cac,
+        ltvToCacRatio,
     };
     
     const automatedInsights = generateAutomatedInsights(plan, kpis, yearlyFinancials);

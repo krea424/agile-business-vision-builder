@@ -1,4 +1,3 @@
-
 import * as XLSX from 'xlsx';
 import PptxGenJS from 'pptxgenjs';
 import { FinancialPlanState, YearlyData, CashFlowYearlyData } from '@/components/FinancialPlan/types';
@@ -40,7 +39,6 @@ export const exportToPptx = (planData: FinancialPlanState, dashboardData: Dashbo
     // SLIDE 2: KPIs
     const slide2 = pptx.addSlide();
     slide2.background = { color: 'F8F9FA' };
-    slide2.addText('Executive Summary - Metriche Chiave', { x: 0.5, y: 0.25, w:'90%', fontSize: 24, fontFace: 'Inter', bold: true, color: '0B132B' });
     const { kpis } = dashboardData;
 
     const kpiRows: (string | { text: string; options: any })[][] = [];
@@ -62,11 +60,18 @@ export const exportToPptx = (planData: FinancialPlanState, dashboardData: Dashbo
         addRow('Tempo di Rientro (Payback)', kpis.paybackPeriodYears ? `${kpis.paybackPeriodYears.toFixed(1)} Anni` : 'N/A');
         addRow('Break-Even Point (EBITDA)', kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto');
         addRow('Punto di Cassa più Basso', kpis.lowestCashPoint ? `${formatCurrency(kpis.lowestCashPoint.value)} (Mese ${kpis.lowestCashPoint.month})` : 'N/A');
+        
+        // Add a spacer row for visual separation
+        kpiRows.push([{ text: 'Unit Economics', options: { ...headerOptions, align: 'center' as const, colspan: 2, fill: '3A506B' } }]);
+        
+        addRow('Valore Cliente (LTV)', formatCurrency(kpis.ltv));
+        addRow('Costo Acquisizione (CAC)', formatCurrency(kpis.cac));
+        addRow('Rapporto LTV:CAC', kpis.ltvToCacRatio ? `${kpis.ltvToCacRatio.toFixed(1)}:1` : 'N/A');
     } else {
         kpiRows.push([{ text: 'Dati KPI non disponibili.', options: { ...metricCellStyle, colspan: 2, align: 'center' as const } }]);
     }
     
-    slide2.addTable(kpiRows as any, { x: 0.5, y: 1.0, w: 9, colW: [4.5, 4.5], rowH: 0.5 });
+    slide2.addTable(kpiRows as any, { x: 0.5, y: 1.0, w: 9, autoPage: true, rowH: 0.5, colW: [4.5, 4.5] });
     
     // SLIDE 3: Chart
     if (dashboardData.monthlyChartData && dashboardData.monthlyChartData.length > 0) {

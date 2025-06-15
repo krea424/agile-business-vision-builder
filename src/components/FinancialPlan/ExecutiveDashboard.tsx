@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ComposedChart, XAxis, YAxis, CartesianGrid, Bar, Line } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
-import { Edit, Banknote, Landmark, AlertTriangle, ArrowDown, CalendarCheck, Percent, Target, Info, BarChart, Presentation } from 'lucide-react';
+import { Edit, Banknote, Landmark, AlertTriangle, ArrowDown, CalendarCheck, Percent, Target, Info, BarChart, Presentation, Gem, CircleDollarSign, Ratio } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { formatCurrency } from '@/lib/utils';
 
@@ -57,7 +57,7 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
   const { kpis, monthlyChartData, automatedInsights } = dashboardData;
 
   // Type guard to ensure KPIs are loaded
-  if (!kpis || !('peakFundingRequirement' in kpis)) {
+  if (!kpis) {
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-secondary/40">
             <Card>
@@ -100,11 +100,18 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
                     <h2 className="text-2xl font-bold tracking-tight mb-4">Metriche Chiave</h2>
                     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-1">
                       <KpiCard title="Fabbisogno Finanziario di Picco" value={formatCurrency(kpis.peakFundingRequirement)} description="Massima esposizione finanziaria richiesta" icon={Banknote} />
+                      <KpiCard title="Punto di Cassa più Basso" value={formatCurrency(kpis.lowestCashPoint?.value)} description={kpis.lowestCashPoint ? `Raggiunto al mese ${kpis.lowestCashPoint.month}` : ''} icon={ArrowDown} />
+                      <KpiCard title="Break-Even Point (EBITDA)" value={kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto'} description="Mese in cui l'EBITDA cumulato è positivo" icon={Target} />
+                      <KpiCard title="Tempo di Rientro (Payback)" value={kpis.paybackPeriodYears ? `${kpis.paybackPeriodYears.toFixed(1)} Anni` : 'N/A'} description="Tempo per recuperare l'investimento" icon={CalendarCheck} />
+                      
+                      <h3 className="text-lg font-semibold tracking-tight mt-4 pt-4 border-t">Metriche di Valutazione</h3>
                       <KpiCard title="Valore d'Impresa (a 5 anni)" value={formatCurrency(kpis.enterpriseValue)} description={`Basato su multiplo EBITDA di ${planData.general.exitMultiple}x`} icon={Landmark} />
                       <KpiCard title="Rendimento Atteso (IRR)" value={`${kpis.irr ? (kpis.irr * 100).toFixed(1) : 'N/A'}%`} description="Rendimento annualizzato dell'investimento" icon={Percent} />
-                      <KpiCard title="Tempo di Rientro (Payback)" value={kpis.paybackPeriodYears ? `${kpis.paybackPeriodYears.toFixed(1)} Anni` : 'N/A'} description="Tempo per recuperare l'investimento" icon={CalendarCheck} />
-                      <KpiCard title="Break-Even Point (EBITDA)" value={kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto'} description="Mese in cui l'EBITDA cumulato è positivo" icon={Target} />
-                      <KpiCard title="Punto di Cassa più Basso" value={formatCurrency(kpis.lowestCashPoint?.value)} description={kpis.lowestCashPoint ? `Raggiunto al mese ${kpis.lowestCashPoint.month}` : ''} icon={ArrowDown} />
+                      
+                      <h3 className="text-lg font-semibold tracking-tight mt-4 pt-4 border-t">Unit Economics</h3>
+                      <KpiCard title="Valore Cliente (LTV)" value={formatCurrency(kpis.ltv)} description="Valore totale previsto da un cliente" icon={Gem} />
+                      <KpiCard title="Costo Acquisizione (CAC)" value={formatCurrency(kpis.cac)} description="Costo medio per acquisire un cliente" icon={CircleDollarSign} />
+                      <KpiCard title="Rapporto LTV:CAC" value={kpis.ltvToCacRatio ? `${kpis.ltvToCacRatio.toFixed(1)}:1` : 'N/A'} description="Un ratio > 3 è considerato sano" icon={Ratio} />
                     </div>
                 </section>
                 
