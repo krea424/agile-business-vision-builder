@@ -135,7 +135,7 @@ const exportToPptx = (planData: FinancialPlanState, dashboardData: any) => {
     pptx.writeFile({ fileName: `${planData.general.scenarioName.replace(/ /g, '_')}_Report.pptx` });
 };
 
-const ExportDialogProps = {
+type ExportDialogProps = {
   isOpen: boolean;
   onClose: () => void;
   planData: FinancialPlanState;
