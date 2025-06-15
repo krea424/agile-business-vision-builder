@@ -52,7 +52,10 @@ export function PersonnelCostRow({ item, index, onInputChange, onContractTypeCha
         <Input
           type="number"
           value={item.hiringMonth || ''}
-          onChange={e => onInputChange(index, 'hiringMonth', Number(e.target.value))}
+          onChange={e => {
+            const value = parseInt(e.target.value, 10);
+            onInputChange(index, 'hiringMonth', isNaN(value) ? 0 : value);
+          }}
           onBlur={() => {
             if (!item.hiringMonth || item.hiringMonth < 1) {
               onInputChange(index, 'hiringMonth', 1);
