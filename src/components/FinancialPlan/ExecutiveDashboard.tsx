@@ -82,8 +82,9 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
       <div className="container mx-auto p-4 md:p-8 lg:p-12">
         <header className="flex justify-between items-center mb-12">
           <div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">Executive Summary: {planData.general.companyName}</h1>
-            <p className="mt-2 text-lg text-muted-foreground">Scenario: {planData.general.scenarioName}</p>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">Executive Summary</h1>
+            <p className="mt-2 text-2xl font-semibold text-slate-700 dark:text-slate-300">{planData.general.companyName}</p>
+            <p className="mt-1 text-lg text-muted-foreground">Scenario: {planData.general.scenarioName}</p>
           </div>
           <div className="flex gap-2">
             <Button onClick={() => navigate('/plan')}>
