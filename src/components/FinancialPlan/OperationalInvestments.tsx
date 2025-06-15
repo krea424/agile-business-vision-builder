@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
@@ -24,7 +23,7 @@ export function OperationalInvestments({ fixedCosts, variableCosts, initialInves
     setFixedCosts(updated);
   };
   
-  const addFixedRow = () => setFixedCosts([...fixedCosts, { id: crypto.randomUUID(), name: '', monthlyCost: 0 }]);
+  const addFixedRow = () => setFixedCosts([...fixedCosts, { id: crypto.randomUUID(), name: '', monthlyCost: 0, startMonth: 1 }]);
   const removeFixedRow = (id: string) => setFixedCosts(fixedCosts.filter(c => c.id !== id));
 
   const handleVariableChange = (index: number, field: keyof VariableCost, value: string | number) => {
@@ -63,6 +62,7 @@ export function OperationalInvestments({ fixedCosts, variableCosts, initialInves
               <TableRow>
                 <TableHead>Voce di Costo</TableHead>
                 <TableHead className="text-right">Costo Mensile (€)</TableHead>
+                <TableHead className="text-right">Mese Avvio (da inizio progetto)</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -71,16 +71,18 @@ export function OperationalInvestments({ fixedCosts, variableCosts, initialInves
                 <TableRow key={cost.id}>
                   <TableCell><Input value={cost.name} onChange={e => handleFixedChange(index, 'name', e.target.value)} placeholder="Es. Affitto ufficio" /></TableCell>
                   <TableCell><Input type="number" value={cost.monthlyCost} onChange={e => handleFixedChange(index, 'monthlyCost', Number(e.target.value))} className="text-right" /></TableCell>
+                  <TableCell><Input type="number" value={cost.startMonth} onChange={e => handleFixedChange(index, 'startMonth', Number(e.target.value))} className="text-right" /></TableCell>
                   <TableCell><Button variant="ghost" size="icon" onClick={() => removeFixedRow(cost.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button></TableCell>
                 </TableRow>
               ))}
             </TableBody>
             <TableFooter>
                 <TableRow>
-                    <TableCell colSpan={2}>
+                    <TableCell>
                         <Button variant="outline" size="sm" onClick={addFixedRow}><PlusCircle className="h-4 w-4 mr-2" /> Aggiungi Voce</Button>
                     </TableCell>
                     <TableCell className="text-right font-bold">{formatCurrency(totalFixed)}</TableCell>
+                    <TableCell colSpan={2}></TableCell>
                 </TableRow>
             </TableFooter>
           </Table>

@@ -64,7 +64,7 @@ export function PersonnelCosts({ data, setData }: Props) {
               <TableHead>Ruolo</TableHead>
               <TableHead>Stipendio Lordo Annuo (RAL)</TableHead>
               <TableHead>Coeff. Costo Azienda</TableHead>
-              <TableHead>Mese di Assunzione</TableHead>
+              <TableHead>Mese Assunzione (da inizio progetto)</TableHead>
               <TableHead>Costo Azienda Annuo</TableHead>
               <TableHead>Costo Effettivo Anno 1</TableHead>
               <TableHead className="w-[50px]"></TableHead>

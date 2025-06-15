@@ -26,6 +26,7 @@ export interface NewClientAcquisition {
   leadsPer100Invested: number;
   conversionRate: number;
   averageAnnualContractValue: number;
+  startMonth: number;
 }
 
 export interface PersonnelCost {
@@ -40,6 +41,7 @@ export interface FixedCost {
   id: string;
   name: string;
   monthlyCost: number;
+  startMonth: number;
 }
 
 export interface VariableCost {

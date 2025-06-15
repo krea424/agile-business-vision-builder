@@ -35,7 +35,7 @@ const initialPlanState: FinancialPlanState = {
     { id: '1', name: 'yardreaas', previousAnnualRevenue: 400000, recoveryProbability: 80, contractStartDateMonth: 3, serviceType: 'ricorrente', recoveryAmountPercentage: 30 },
   ],
   newClients: [
-      { id: '1', channel: 'Commerciale', monthlyMarketingInvestment: 1000, leadsPer100Invested: 5, conversionRate: 10, averageAnnualContractValue: 15000 },
+      { id: '1', channel: 'Commerciale', monthlyMarketingInvestment: 1000, leadsPer100Invested: 5, conversionRate: 10, averageAnnualContractValue: 15000, startMonth: 1 },
   ],
   personnelCosts: [
     { id: '1', role: 'Visurista Esperto 1', annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
@@ -47,12 +47,12 @@ const initialPlanState: FinancialPlanState = {
     { id: '7', role: 'Commerciale (Founder)', annualGrossSalary: 18000, companyCostCoefficient: 1.0, hiringMonth: 7 },
   ],
   fixedCosts: [
-    { id: '1', name: 'Affitto ufficio', monthlyCost: 1000 },
-    { id: '2', name: 'Utenze', monthlyCost: 300 },
-    { id: '3', name: 'Servizio Cloud', monthlyCost: 300 },
-    { id: '4', name: 'Licenze Software', monthlyCost: 300 },
-    { id: '5', name: 'Commercialista', monthlyCost: 250 },
-    { id: '6', name: 'Consulente del Lavoro', monthlyCost: 150 },
+    { id: '1', name: 'Affitto ufficio', monthlyCost: 1000, startMonth: 1 },
+    { id: '2', name: 'Utenze', monthlyCost: 300, startMonth: 1 },
+    { id: '3', name: 'Servizio Cloud', monthlyCost: 300, startMonth: 1 },
+    { id: '4', name: 'Licenze Software', monthlyCost: 300, startMonth: 1 },
+    { id: '5', name: 'Commercialista', monthlyCost: 250, startMonth: 1 },
+    { id: '6', name: 'Consulente del Lavoro', monthlyCost: 150, startMonth: 1 },
   ],
   variableCosts: [],
   initialInvestments: [

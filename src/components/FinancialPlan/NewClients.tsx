@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
@@ -34,7 +33,7 @@ export function NewClients({ data, setData }: Props) {
   };
 
   const addRow = () => {
-    setData([...data, { id: crypto.randomUUID(), channel: '', monthlyMarketingInvestment: 0, leadsPer100Invested: 0, conversionRate: 0, averageAnnualContractValue: 0 }]);
+    setData([...data, { id: crypto.randomUUID(), channel: '', monthlyMarketingInvestment: 0, leadsPer100Invested: 0, conversionRate: 0, averageAnnualContractValue: 0, startMonth: 1 }]);
   };
 
   const removeRow = (id: string) => {
@@ -59,6 +58,7 @@ export function NewClients({ data, setData }: Props) {
               <TableHead>Lead / 100€ investiti</TableHead>
               <TableHead>Tasso Conversione (%)</TableHead>
               <TableHead>Valore Medio Contratto Annuo (€)</TableHead>
+              <TableHead className="text-right">Mese Partenza (da inizio progetto)</TableHead>
               <TableHead className="text-right">Ricavi Annui Ricorrenti Generati</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
@@ -73,6 +73,7 @@ export function NewClients({ data, setData }: Props) {
                   <TableCell><Input type="number" value={item.leadsPer100Invested} onChange={e => handleInputChange(index, 'leadsPer100Invested', Number(e.target.value))} className="text-right" /></TableCell>
                   <TableCell><Input type="number" value={item.conversionRate} onChange={e => handleInputChange(index, 'conversionRate', Number(e.target.value))} className="text-right" /></TableCell>
                   <TableCell><Input type="number" value={item.averageAnnualContractValue} onChange={e => handleInputChange(index, 'averageAnnualContractValue', Number(e.target.value))} className="text-right" /></TableCell>
+                  <TableCell><Input type="number" value={item.startMonth} onChange={e => handleInputChange(index, 'startMonth', Number(e.target.value))} className="text-right" /></TableCell>
                   <TableCell className="text-right font-semibold tabular-nums">
                     {formatCurrency(generatedRevenue)}
                   </TableCell>
@@ -83,7 +84,7 @@ export function NewClients({ data, setData }: Props) {
           </TableBody>
           <TableFooter>
             <TableRow>
-                <TableCell colSpan={5}>
+                <TableCell colSpan={6}>
                     <Button variant="outline" size="sm" onClick={addRow}><PlusCircle className="h-4 w-4 mr-2" /> Aggiungi Canale</Button>
                 </TableCell>
                 <TableCell className="text-right font-bold tabular-nums">

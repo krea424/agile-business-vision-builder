@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
@@ -59,7 +60,7 @@ export function RecoverableClients({ data, setData }: Props) {
               <TableHead>Cliente/Cluster</TableHead>
               <TableHead>Fatturato Annuo Pregresso</TableHead>
               <TableHead>Prob. di Recupero %</TableHead>
-              <TableHead>Mese di Partenza Contratto</TableHead>
+              <TableHead>Mese Partenza Contratto (da inizio progetto)</TableHead>
               <TableHead>Tipo Servizio</TableHead>
               <TableHead>% Importo di Recupero</TableHead>
               <TableHead>Fatturato Recuperato Atteso</TableHead>
