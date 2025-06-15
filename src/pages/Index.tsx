@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { FinancialPlanState } from '@/components/FinancialPlan/types';
 import { GeneralAssumptions } from '@/components/FinancialPlan/GeneralAssumptions';
@@ -65,8 +65,34 @@ const initialPlanState: FinancialPlanState = {
   ],
 };
 
+const LOCAL_STORAGE_KEY = 'financial-plan-data';
+
 const Index = () => {
-  const [planData, setPlanData] = useState<FinancialPlanState>(initialPlanState);
+  const [planData, setPlanData] = useState<FinancialPlanState>(() => {
+    if (typeof window === 'undefined') {
+      return initialPlanState;
+    }
+    try {
+      const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        // A simple check to ensure data is somewhat valid before using
+        if (parsedData.general && parsedData.recoverableClients) {
+          return parsedData;
+        }
+      }
+    } catch (error) {
+      console.error("Error reading financial plan data from localStorage", error);
+    }
+    return initialPlanState;
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(planData));
+    }
+  }, [planData]);
+  
   const [activeTab, setActiveTab] = useState('general');
 
   const setGeneral = (data: FinancialPlanState['general']) => setPlanData(prev => ({...prev, general: data}));
