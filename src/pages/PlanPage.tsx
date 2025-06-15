@@ -16,9 +16,12 @@ import { CashFlowStatement } from '@/components/FinancialPlan/CashFlowStatement'
 import { calculateCashFlowSummary } from '@/components/FinancialPlan/cashFlowCalculator';
 import { calculateDashboardData } from '@/components/FinancialPlan/dashboardCalculator';
 import { Button } from "@/components/ui/button";
-import { Save, Home, ArrowLeft, ArrowRight, Info } from "lucide-react";
+import { Save, Home, ArrowLeft, ArrowRight, Info, FileText, Presentation, FileDown, Loader2 } from "lucide-react";
 import { Stepper } from '@/components/ui/stepper';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import * as XLSX from 'xlsx';
+import PptxGenJS from 'pptxgenjs';
 
 const initialPlanState: FinancialPlanState = {
   general: {
@@ -77,6 +80,125 @@ const initialPlanState: FinancialPlanState = {
 
 const LOCAL_STORAGE_KEY = 'financial-plan-data';
 
+const formatCurrency = (value: number | undefined) => {
+    if (value === undefined || value === null || isNaN(value)) return "N/A";
+    return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(value);
+};
+
+const exportToExcel = (planData: FinancialPlanState, financialSummary: any[], cashFlowSummary: any[]) => {
+    const wb = XLSX.utils.book_new();
+
+    const generalData = Object.entries(planData.general).map(([key, value]) => ({ 'Proprietà': key, 'Valore': value }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(generalData), "Assunzioni Generali");
+    
+    if(planData.recoverableClients.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(planData.recoverableClients), "Clienti da Recuperare");
+    if(planData.newClients.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(planData.newClients), "Nuovi Clienti");
+    if(planData.directlyAcquiredClients.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(planData.directlyAcquiredClients), "Clienti Diretti");
+    if(planData.personnelCosts.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(planData.personnelCosts), "Costi Personale");
+    if(planData.fixedCosts.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(planData.fixedCosts), "Costi Fissi");
+    if(planData.variableCosts.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(planData.variableCosts), "Costi Variabili");
+    if(planData.initialInvestments.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(planData.initialInvestments), "Investimenti");
+    
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(financialSummary), "Conto Economico");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cashFlowSummary), "Flusso di Cassa");
+
+    XLSX.writeFile(wb, `${planData.general.scenarioName.replace(/ /g, '_')}_Export.xlsx`);
+};
+
+const exportToPptx = (planData: FinancialPlanState, dashboardData: any) => {
+    const pptx = new PptxGenJS();
+    pptx.layout = 'LAYOUT_WIDE';
+
+    const slide1 = pptx.addSlide();
+    slide1.addText(`Report Finanziario: ${planData.general.companyName}`, { x: 0.5, y: 1.5, fontSize: 32, bold: true, color: '003366' });
+    slide1.addText(`Scenario: ${planData.general.scenarioName}`, { x: 0.5, y: 2.5, fontSize: 22, color: '333333' });
+    slide1.addText(`Data: ${new Date().toLocaleDateString('it-IT')}`, { x: 0.5, y: 5.0, fontSize: 14, color: '888888' });
+
+    const slide2 = pptx.addSlide();
+    slide2.addText('Executive Summary - Metriche Chiave', { x: 0.5, y: 0.5, fontSize: 24, bold: true, color: '003366' });
+    const kpis = dashboardData.kpis;
+    const kpiText = [
+        { text: 'Fabbisogno Finanziario: ', options: { bold: true } },
+        { text: formatCurrency(kpis.peakFundingRequirement) },
+        { text: '\nValore d\'Impresa (a 5 anni): ', options: { bold: true } },
+        { text: formatCurrency(kpis.enterpriseValue) },
+        { text: '\nIRR: ', options: { bold: true } },
+        { text: `${kpis.irr ? (kpis.irr * 100).toFixed(1) : 'N/A'}%` },
+        { text: '\nPayback Period: ', options: { bold: true } },
+        { text: kpis.paybackPeriodYears ? `${kpis.paybackPeriodYears.toFixed(1)} Anni` : 'N/A' },
+        { text: '\nBreak-Even Point (EBITDA): ', options: { bold: true } },
+        { text: kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto' },
+    ];
+    slide2.addText(kpiText, { x: 1, y: 1.5, w: '80%', h: 3, fontSize: 16, charSpacing: 1, lineSpacing: 28 });
+    slide2.addText('Nota: I grafici e le tabelle dettagliate non sono inclusi in questa esportazione base.', { x: 0.5, y: 5, fontSize: 12, color: 'C00000' });
+    
+    pptx.writeFile({ fileName: `${planData.general.scenarioName.replace(/ /g, '_')}_Report.pptx` });
+};
+
+const ExportDialogProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  planData: FinancialPlanState;
+  financialSummary: any[];
+  cashFlowSummary: any[];
+  dashboardData: any;
+};
+
+const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose, planData, financialSummary, cashFlowSummary, dashboardData }) => {
+    const navigate = useNavigate();
+    const [isGenerating, setIsGenerating] = useState<null | 'excel' | 'pptx'>(null);
+
+    const handleExport = async (type: 'excel' | 'pptx') => {
+        setIsGenerating(type);
+        // a small delay to allow UI to update
+        await new Promise(resolve => setTimeout(resolve, 100));
+        try {
+            if (type === 'excel') {
+                exportToExcel(planData, financialSummary, cashFlowSummary);
+            } else if (type === 'pptx') {
+                exportToPptx(planData, dashboardData);
+            }
+        } catch (error) {
+            console.error(`Error generating ${type} file:`, error);
+        } finally {
+            setIsGenerating(null);
+            onClose();
+        }
+    };
+    
+    const handlePdfExport = () => {
+        navigate('/report', { state: { planData, financialSummary, cashFlowSummary, dashboardData, autoPrint: true } });
+        onClose();
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Esporta Scenario Professionale</DialogTitle>
+                    <DialogDescription>
+                        Scegli il formato per il tuo report. Questa è una funzionalità premium per presentare i tuoi dati in modo efficace.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-1 gap-4 py-4">
+                    <Button onClick={handlePdfExport} variant="outline"><FileText className="mr-2"/> PDF Executive Summary</Button>
+                    <Button onClick={() => handleExport('pptx')} variant="outline" disabled={isGenerating !== null}>
+                        {isGenerating === 'pptx' ? <Loader2 className="mr-2 animate-spin" /> : <Presentation className="mr-2" />}
+                        Presentazione PowerPoint (.pptx)
+                    </Button>
+                    <Button onClick={() => handleExport('excel')} variant="outline" disabled={isGenerating !== null}>
+                        {isGenerating === 'excel' ? <Loader2 className="mr-2 animate-spin" /> : <FileDown className="mr-2" />}
+                        File Excel Dettagliato (.xlsx)
+                    </Button>
+                </div>
+                <DialogFooter>
+                    <p className="text-xs text-muted-foreground text-center w-full">L'esportazione di PPTX e Excel potrebbe richiedere alcuni secondi.</p>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 const PlanPage = () => {
   const [planData, setPlanData] = useState<FinancialPlanState>(() => {
     if (typeof window === 'undefined') {
@@ -107,6 +229,7 @@ const PlanPage = () => {
   const tabMapping = ['general', 'revenues', 'costs', 'income', 'cashflow'];
   const [activeStep, setActiveStep] = useState(0);
   const activeTab = tabMapping[activeStep];
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   const handleNext = () => {
       if (activeStep < steps.length - 1) {
@@ -157,114 +280,124 @@ const PlanPage = () => {
   }, [planData, financialSummary, cashFlowSummary]);
 
   const navigate = useNavigate();
-  const handleExport = () => navigate('/report', { state: { planData, financialSummary, cashFlowSummary, dashboardData } });
+  const handleExport = () => setIsExportDialogOpen(true);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">
-      <div className="container mx-auto p-4 md:p-8 lg:p-12">
-        <header className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">Financial Sustainability Plan</h1>
-          <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">Simulatore di volo per testare le decisioni strategiche.</p>
-        </header>
-        
-        <div className="mb-12">
+    <>
+      <div className="min-h-screen w-full bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">
+        <div className="container mx-auto p-4 md:p-8 lg:p-12">
+          <header className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">Financial Sustainability Plan</h1>
+            <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">Simulatore di volo per testare le decisioni strategiche.</p>
+          </header>
+          
+          <div className="mb-12">
             <Stepper steps={steps} currentStep={activeStep} />
-        </div>
+          </div>
 
-        <div className="flex justify-between items-center mb-6">
-          <Button variant="outline" onClick={() => navigate('/')}>
-            <Home className="mr-2 h-4 w-4" /> Dashboard
-          </Button>
-          <div className="flex gap-2">
-            <Button onClick={handlePrev} disabled={activeStep === 0} variant="outline">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Indietro
+          <div className="flex justify-between items-center mb-6">
+            <Button variant="outline" onClick={() => navigate('/')}>
+              <Home className="mr-2 h-4 w-4" /> Dashboard
             </Button>
-            {activeStep < steps.length - 1 ? (
-                 <Button onClick={handleNext}>
-                     Avanti <ArrowRight className="ml-2 h-4 w-4" />
-                 </Button>
-            ) : (
-                 <Button onClick={handleExport}>
-                     <Save className="mr-2 h-4 w-4" /> Salva ed Esporta Scenario
-                 </Button>
-            )}
-           </div>
+            <div className="flex gap-2">
+              <Button onClick={handlePrev} disabled={activeStep === 0} variant="outline">
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Indietro
+              </Button>
+              {activeStep < steps.length - 1 ? (
+                   <Button onClick={handleNext}>
+                       Avanti <ArrowRight className="ml-2 h-4 w-4" />
+                   </Button>
+              ) : (
+                   <Button onClick={handleExport}>
+                       <Save className="mr-2 h-4 w-4" /> Salva ed Esporta Scenario
+                   </Button>
+              )}
+             </div>
+          </div>
+
+          <Tabs value={activeTab} className="w-full">
+            <TabsContent value="general">
+              <Alert className="mb-6">
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>1. Ipotesi Generali</AlertTitle>
+                  <AlertDescription>
+                      Benvenuto! Inizia da qui. Inserisci le assunzioni di base per il tuo piano. Questi dati influenzeranno tutti i calcoli successivi. Pensa a questo come alle fondamenta della tua casa finanziaria.
+                  </AlertDescription>
+              </Alert>
+              <GeneralAssumptions data={planData.general} setData={setGeneral} />
+            </TabsContent>
+
+            <TabsContent value="revenues" className="space-y-6">
+              <Alert className="mb-6">
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>2. Previsione dei Ricavi</AlertTitle>
+                  <AlertDescription>
+                      <p>Come genererà entrate la tua azienda? Definisci qui le diverse fonti di ricavo.</p>
+                      <ul className="list-disc pl-5 mt-2 space-y-1 text-xs">
+                          <li><strong>Clienti da Recuperare:</strong> Clienti persi che potresti riconquistare.</li>
+                          <li><strong>Nuovi Clienti (da Canali Strutturati):</strong> Acquisizione tramite marketing e vendite.</li>
+                          <li><strong>Nuovi Clienti (Acquisiti Direttamente):</strong> Contatti diretti, passaparola, ecc.</li>
+                      </ul>
+                  </AlertDescription>
+              </Alert>
+              <RecoverableClients data={planData.recoverableClients} setData={setRecoverableClients} />
+              <NewClients data={planData.newClients} setData={setNewClients} />
+              <DirectlyAcquiredClients data={planData.directlyAcquiredClients} setData={setDirectlyAcquiredClients} />
+            </TabsContent>
+
+            <TabsContent value="costs" className="space-y-6">
+              <Alert className="mb-6">
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>3. Struttura dei Costi</AlertTitle>
+                  <AlertDescription>
+                      <p>Quali sono le spese necessarie per far funzionare la tua attività? Suddividile qui.</p>
+                      <ul className="list-disc pl-5 mt-2 space-y-1 text-xs">
+                          <li><strong>Personale:</strong> Il costo del tuo team. Il "Costo Azienda" è circa 1.6 volte la Retribuzione Annua Lorda (RAL) per i dipendenti.</li>
+                          <li><strong>Costi Fissi:</strong> Spese che non cambiano con il volume delle vendite (es. affitto, software).</li>
+                          <li><strong>Costi Variabili:</strong> Spese legate direttamente ai ricavi (es. commissioni).</li>
+                          <li><strong>Investimenti:</strong> Acquisti di beni durevoli che vengono ammortizzati nel tempo.</li>
+                      </ul>
+                  </AlertDescription>
+              </Alert>
+              <PersonnelCosts data={planData.personnelCosts} setData={setPersonnelCosts} />
+              <FixedCosts data={planData.fixedCosts} setData={setFixedCosts} />
+              <VariableCosts data={planData.variableCosts} setData={setVariableCosts} />
+              <Investments data={planData.initialInvestments} setData={setInitialInvestments} />
+            </TabsContent>
+
+            <TabsContent value="income">
+              <Alert className="mb-6">
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>4. Conto Economico Previsionale</AlertTitle>
+                  <AlertDescription>
+                      Questo è il riassunto della performance economica del tuo business. Mostra la differenza tra ricavi e costi, portando all'utile o alla perdita. Non puoi modificare direttamente questa tabella, è calcolata automaticamente.
+                  </AlertDescription>
+              </Alert>
+              <IncomeStatement data={financialSummary} />
+            </TabsContent>
+
+            <TabsContent value="cashflow">
+              <Alert className="mb-6">
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>5. Flusso di Cassa Previsionale</AlertTitle>
+                  <AlertDescription>
+                      Qui vedi l'effettivo movimento di denaro (entrate e uscite). È fondamentale per capire la liquidità e la sostenibilità finanziaria. La cassa è il re! Questa tabella è calcolata automaticamente.
+                  </AlertDescription>
+              </Alert>
+              <CashFlowStatement data={cashFlowSummary} />
+            </TabsContent>
+          </Tabs>
         </div>
-
-        <Tabs value={activeTab} className="w-full">
-          <TabsContent value="general">
-            <Alert className="mb-6">
-                <Info className="h-4 w-4" />
-                <AlertTitle>1. Ipotesi Generali</AlertTitle>
-                <AlertDescription>
-                    Benvenuto! Inizia da qui. Inserisci le assunzioni di base per il tuo piano. Questi dati influenzeranno tutti i calcoli successivi. Pensa a questo come alle fondamenta della tua casa finanziaria.
-                </AlertDescription>
-            </Alert>
-            <GeneralAssumptions data={planData.general} setData={setGeneral} />
-          </TabsContent>
-
-          <TabsContent value="revenues" className="space-y-6">
-            <Alert className="mb-6">
-                <Info className="h-4 w-4" />
-                <AlertTitle>2. Previsione dei Ricavi</AlertTitle>
-                <AlertDescription>
-                    <p>Come genererà entrate la tua azienda? Definisci qui le diverse fonti di ricavo.</p>
-                    <ul className="list-disc pl-5 mt-2 space-y-1 text-xs">
-                        <li><strong>Clienti da Recuperare:</strong> Clienti persi che potresti riconquistare.</li>
-                        <li><strong>Nuovi Clienti (da Canali Strutturati):</strong> Acquisizione tramite marketing e vendite.</li>
-                        <li><strong>Nuovi Clienti (Acquisiti Direttamente):</strong> Contatti diretti, passaparola, ecc.</li>
-                    </ul>
-                </AlertDescription>
-            </Alert>
-            <RecoverableClients data={planData.recoverableClients} setData={setRecoverableClients} />
-            <NewClients data={planData.newClients} setData={setNewClients} />
-            <DirectlyAcquiredClients data={planData.directlyAcquiredClients} setData={setDirectlyAcquiredClients} />
-          </TabsContent>
-
-          <TabsContent value="costs" className="space-y-6">
-            <Alert className="mb-6">
-                <Info className="h-4 w-4" />
-                <AlertTitle>3. Struttura dei Costi</AlertTitle>
-                <AlertDescription>
-                    <p>Quali sono le spese necessarie per far funzionare la tua attività? Suddividile qui.</p>
-                    <ul className="list-disc pl-5 mt-2 space-y-1 text-xs">
-                        <li><strong>Personale:</strong> Il costo del tuo team. Il "Costo Azienda" è circa 1.6 volte la Retribuzione Annua Lorda (RAL) per i dipendenti.</li>
-                        <li><strong>Costi Fissi:</strong> Spese che non cambiano con il volume delle vendite (es. affitto, software).</li>
-                        <li><strong>Costi Variabili:</strong> Spese legate direttamente ai ricavi (es. commissioni).</li>
-                        <li><strong>Investimenti:</strong> Acquisti di beni durevoli che vengono ammortizzati nel tempo.</li>
-                    </ul>
-                </AlertDescription>
-            </Alert>
-            <PersonnelCosts data={planData.personnelCosts} setData={setPersonnelCosts} />
-            <FixedCosts data={planData.fixedCosts} setData={setFixedCosts} />
-            <VariableCosts data={planData.variableCosts} setData={setVariableCosts} />
-            <Investments data={planData.initialInvestments} setData={setInitialInvestments} />
-          </TabsContent>
-
-          <TabsContent value="income">
-            <Alert className="mb-6">
-                <Info className="h-4 w-4" />
-                <AlertTitle>4. Conto Economico Previsionale</AlertTitle>
-                <AlertDescription>
-                    Questo è il riassunto della performance economica del tuo business. Mostra la differenza tra ricavi e costi, portando all'utile o alla perdita. Non puoi modificare direttamente questa tabella, è calcolata automaticamente.
-                </AlertDescription>
-            </Alert>
-            <IncomeStatement data={financialSummary} />
-          </TabsContent>
-
-          <TabsContent value="cashflow">
-            <Alert className="mb-6">
-                <Info className="h-4 w-4" />
-                <AlertTitle>5. Flusso di Cassa Previsionale</AlertTitle>
-                <AlertDescription>
-                    Qui vedi l'effettivo movimento di denaro (entrate e uscite). È fondamentale per capire la liquidità e la sostenibilità finanziaria. La cassa è il re! Questa tabella è calcolata automaticamente.
-                </AlertDescription>
-            </Alert>
-            <CashFlowStatement data={cashFlowSummary} />
-          </TabsContent>
-        </Tabs>
       </div>
-    </div>
+      <ExportDialog
+        isOpen={isExportDialogOpen}
+        onClose={() => setIsExportDialogOpen(false)}
+        planData={planData}
+        financialSummary={financialSummary}
+        cashFlowSummary={cashFlowSummary}
+        dashboardData={dashboardData}
+      />
+    </>
   );
 };
 

@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Printer, AlertTriangle, Info } from 'lucide-react';
@@ -165,7 +166,17 @@ const DashboardDisplay: React.FC<{ data: any, planData: FinancialPlanState }> = 
 const ScenarioReport = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { planData, financialSummary, cashFlowSummary, dashboardData } = location.state || {};
+    const { planData, financialSummary, cashFlowSummary, dashboardData, autoPrint } = location.state || {};
+
+    useEffect(() => {
+        if (autoPrint) {
+            // Use a timeout to ensure all content and styles are rendered before printing
+            const timer = setTimeout(() => {
+                window.print();
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [autoPrint]);
 
     const formatCurrency = (value: number) => {
         if (typeof value !== 'number' || isNaN(value)) return '';
