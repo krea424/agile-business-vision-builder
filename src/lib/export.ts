@@ -1,11 +1,11 @@
 
 import * as XLSX from 'xlsx';
 import PptxGenJS from 'pptxgenjs';
-import { FinancialPlanState, IncomeStatementRow, CashFlowRow } from '@/components/FinancialPlan/types';
-import { DashboardData } from '@/components/FinancialPlan/dashboardCalculator';
+import { FinancialPlanState, YearlyData, CashFlowYearlyData } from '@/components/FinancialPlan/types';
+import { DashboardData, KpiData } from '@/components/FinancialPlan/dashboardCalculator';
 import { formatCurrency } from '@/lib/utils';
 
-export const exportToExcel = (planData: FinancialPlanState, financialSummary: IncomeStatementRow[], cashFlowSummary: CashFlowRow[]) => {
+export const exportToExcel = (planData: FinancialPlanState, financialSummary: YearlyData[], cashFlowSummary: CashFlowYearlyData[]) => {
     const wb = XLSX.utils.book_new();
 
     const generalData = Object.entries(planData.general).map(([key, value]) => ({ 'Proprietà': key, 'Valore': value }));
@@ -55,12 +55,16 @@ export const exportToPptx = (planData: FinancialPlanState, dashboardData: Dashbo
         kpiRows.push([{ text: metric, options: metricCellStyle }, { text: value, options: valueCellStyle }]);
     };
 
-    addRow('Fabbisogno Finanziario di Picco', formatCurrency(kpis.peakFundingRequirement));
-    addRow(`Valore d'Impresa (a ${planData.general.timeHorizon} anni)`, formatCurrency(kpis.enterpriseValue));
-    addRow('IRR (Internal Rate of Return)', `${kpis.irr ? (kpis.irr * 100).toFixed(1) : 'N/A'}%`);
-    addRow('Tempo di Rientro (Payback)', kpis.paybackPeriodYears ? `${kpis.paybackPeriodYears.toFixed(1)} Anni` : 'N/A');
-    addRow('Break-Even Point (EBITDA)', kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto');
-    addRow('Punto di Cassa più Basso', kpis.lowestCashPoint ? `${formatCurrency(kpis.lowestCashPoint.value)} (Mese ${kpis.lowestCashPoint.month})` : 'N/A');
+    if (kpis) {
+        addRow('Fabbisogno Finanziario di Picco', formatCurrency(kpis.peakFundingRequirement));
+        addRow(`Valore d'Impresa (a ${planData.general.timeHorizon} anni)`, formatCurrency(kpis.enterpriseValue));
+        addRow('IRR (Internal Rate of Return)', `${kpis.irr ? (kpis.irr * 100).toFixed(1) : 'N/A'}%`);
+        addRow('Tempo di Rientro (Payback)', kpis.paybackPeriodYears ? `${kpis.paybackPeriodYears.toFixed(1)} Anni` : 'N/A');
+        addRow('Break-Even Point (EBITDA)', kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto');
+        addRow('Punto di Cassa più Basso', kpis.lowestCashPoint ? `${formatCurrency(kpis.lowestCashPoint.value)} (Mese ${kpis.lowestCashPoint.month})` : 'N/A');
+    } else {
+        kpiRows.push([{ text: 'Dati KPI non disponibili.', options: { ...metricCellStyle, colspan: 2, align: 'center' as const } }]);
+    }
     
     slide2.addTable(kpiRows as any, { x: 0.5, y: 1.0, w: 9, colW: [4.5, 4.5], rowH: 0.5 });
     
@@ -96,8 +100,8 @@ export const exportToPptx = (planData: FinancialPlanState, dashboardData: Dashbo
             catAxisLabelFontBold: true,
             valAxisLabelFormatCode: '#,##0',
             valAxisTitle: 'Importo (€k)',
-            catAxisLabelFont: 'Inter',
-            valAxisLabelFont: 'Inter',
+            catAxisLabelFontFace: 'Inter',
+            valAxisLabelFontFace: 'Inter',
             legendFontFace: 'Inter',
         };
         

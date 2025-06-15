@@ -1,3 +1,4 @@
+
 import { FinancialPlanState, YearlyData, CashFlowYearlyData } from './types';
 
 // Simple IRR calculation using the Newton-Raphson method
@@ -44,7 +45,7 @@ export type KpiData = {
 };
 
 export type DashboardData = {
-    kpis: KpiData | {};
+    kpis: KpiData | null;
     monthlyChartData: { name: string; Ricavi: number; EBITDA: number; 'Cassa Finale': number; }[];
     automatedInsights: Insight[];
 };
@@ -126,7 +127,7 @@ export const generateAutomatedInsights = (plan: FinancialPlanState, kpis: any, y
 export const calculateDashboardData = (plan: FinancialPlanState, yearlyFinancials: YearlyData[], yearlyCashFlow: CashFlowYearlyData[]): DashboardData => {
     if (!plan || yearlyFinancials.length === 0 || yearlyCashFlow.length === 0) {
         return {
-            kpis: {},
+            kpis: null,
             monthlyChartData: [],
             automatedInsights: []
         };

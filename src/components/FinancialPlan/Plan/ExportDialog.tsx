@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FinancialPlanState, IncomeStatementRow, CashFlowRow } from '@/components/FinancialPlan/types';
+import { FinancialPlanState, YearlyData, CashFlowYearlyData } from '@/components/FinancialPlan/types';
 import { DashboardData } from '@/components/FinancialPlan/dashboardCalculator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,8 @@ type ExportDialogProps = {
   isOpen: boolean;
   onClose: () => void;
   planData: FinancialPlanState;
-  financialSummary: IncomeStatementRow[];
-  cashFlowSummary: CashFlowRow[];
+  financialSummary: YearlyData[];
+  cashFlowSummary: CashFlowYearlyData[];
   dashboardData: DashboardData;
 };
 
