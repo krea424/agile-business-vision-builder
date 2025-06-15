@@ -1,11 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { VariableCost } from './types';
 
 interface Props {
@@ -14,6 +14,12 @@ interface Props {
 }
 
 export function VariableCosts({ data, setData }: Props) {
+    const [openState, setOpenState] = useState<Record<string, boolean>>({});
+
+    const toggleRow = (id: string) => {
+        setOpenState(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
     const handleParentInputChange = (index: number, field: keyof Omit<VariableCost, 'subItems' | 'id'>, value: any) => {
     const updated = [...data];
     const item = { ...updated[index], [field]: value };
@@ -89,11 +95,21 @@ export function VariableCosts({ data, setData }: Props) {
               const parentValue = hasSubItems 
                 ? cost.subItems.reduce((acc, si) => acc + Number(si.value || 0), 0) 
                 : cost.value;
+              const isOpen = openState[cost.id] ?? false;
 
               return (
               <React.Fragment key={cost.id}>
                 <TableRow>
-                  <TableCell><Input value={cost.name} onChange={e => handleParentInputChange(index, 'name', e.target.value)} placeholder="Es. Commissioni" /></TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                        {hasSubItems ? (
+                            <Button variant="ghost" size="icon" onClick={() => toggleRow(cost.id)} className="h-8 w-8 shrink-0">
+                            {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            </Button>
+                        ) : <div className="w-8 h-8 shrink-0" />}
+                        <Input value={cost.name} onChange={e => handleParentInputChange(index, 'name', e.target.value)} placeholder="Es. Commissioni" />
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Select value={cost.calculationMethod} onValueChange={value => handleParentInputChange(index, 'calculationMethod', value)}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
@@ -122,7 +138,7 @@ export function VariableCosts({ data, setData }: Props) {
                     <Button variant="ghost" size="icon" onClick={() => removeRow(cost.id)} aria-label="Rimuovi voce"><Trash2 className="h-4 w-4 text-red-500" /></Button>
                   </TableCell>
                 </TableRow>
-                {hasSubItems && cost.subItems.map((subItem, subIndex) => (
+                {hasSubItems && isOpen && cost.subItems.map((subItem, subIndex) => (
                   <TableRow key={subItem.id} className="bg-muted/50">
                     <TableCell className="pl-12">
                       <Input value={subItem.name} onChange={e => handleSubItemInputChange(index, subIndex, 'name', e.target.value)} placeholder="Sotto-voce di costo" />

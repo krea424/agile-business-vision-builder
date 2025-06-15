@@ -1,11 +1,11 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { InitialInvestment } from './types';
 
 interface Props {
@@ -14,6 +14,12 @@ interface Props {
 }
 
 export function Investments({ data, setData }: Props) {
+  const [openState, setOpenState] = useState<Record<string, boolean>>({});
+
+  const toggleRow = (id: string) => {
+    setOpenState(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   const handleParentInputChange = (index: number, field: keyof Omit<InitialInvestment, 'subItems' | 'id'>, value: any) => {
     const updated = [...data];
     const item = { ...updated[index], [field]: value };
@@ -98,11 +104,21 @@ export function Investments({ data, setData }: Props) {
             {data.map((investment, index) => {
               const hasSubItems = investment.subItems && investment.subItems.length > 0;
               const parentCost = getInvestmentCost(investment);
+              const isOpen = openState[investment.id] ?? false;
 
               return (
               <React.Fragment key={investment.id}>
                 <TableRow>
-                  <TableCell><Input value={investment.name} onChange={e => handleParentInputChange(index, 'name', e.target.value)} placeholder="Es. Hardware" /></TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      {hasSubItems ? (
+                        <Button variant="ghost" size="icon" onClick={() => toggleRow(investment.id)} className="h-8 w-8 shrink-0">
+                          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </Button>
+                      ) : <div className="w-8 h-8 shrink-0" /> }
+                      <Input value={investment.name} onChange={e => handleParentInputChange(index, 'name', e.target.value)} placeholder="Es. Hardware" />
+                    </div>
+                  </TableCell>
                   <TableCell><Input type="number" value={parentCost} readOnly={hasSubItems} onChange={e => handleParentInputChange(index, 'cost', Number(e.target.value))} className="text-right" /></TableCell>
                   <TableCell><Input type="number" value={investment.investmentMonth} onChange={e => handleParentInputChange(index, 'investmentMonth', Number(e.target.value))} className="text-right" /></TableCell>
                   <TableCell><Input type="number" value={investment.amortizationYears} onChange={e => handleParentInputChange(index, 'amortizationYears', Number(e.target.value))} className="text-right" /></TableCell>
@@ -125,7 +141,7 @@ export function Investments({ data, setData }: Props) {
                     <Button variant="ghost" size="icon" onClick={() => removeRow(investment.id)} aria-label="Rimuovi voce"><Trash2 className="h-4 w-4 text-red-500" /></Button>
                   </TableCell>
                 </TableRow>
-                {hasSubItems && investment.subItems.map((subItem, subIndex) => (
+                {hasSubItems && isOpen && investment.subItems.map((subItem, subIndex) => (
                     <TableRow key={subItem.id} className="bg-muted/50">
                         <TableCell className="pl-12">
                             <Input value={subItem.name} onChange={e => handleSubItemInputChange(index, subIndex, 'name', e.target.value)} placeholder="Sotto-voce di costo" />
