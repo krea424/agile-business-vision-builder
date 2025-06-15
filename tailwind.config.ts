@@ -20,7 +20,7 @@ export default {
 		},
 		extend: {
       fontFamily: {
-        lato: ["Lato", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
       },
 			colors: {
 				border: 'hsl(var(--border))',
@@ -60,6 +60,7 @@ export default {
           revenue: "hsl(var(--chart-revenue))",
           ebitda: "hsl(var(--chart-ebitda))",
           cash: "hsl(var(--chart-cash))",
+          accent: "hsl(var(--chart-accent))",
         },
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -103,3 +104,4 @@ export default {
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+

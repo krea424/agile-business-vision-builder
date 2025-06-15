@@ -122,10 +122,10 @@ const exportToPptx = (planData: FinancialPlanState, dashboardData: any) => {
     const { kpis } = dashboardData;
 
     const kpiRows: (string | { text: string; options: any })[][] = [];
-    const headerOptions = { fill: '003366', color: 'FFFFFF', bold: true, valign: 'middle', align: 'center', fontSize: 12 };
+    const headerOptions = { fill: '003366', color: 'FFFFFF', bold: true, valign: 'middle' as const, align: 'center' as const, fontSize: 12 };
     kpiRows.push([{ text: 'Metrica Chiave', options: headerOptions }, { text: 'Valore', options: headerOptions }]);
 
-    const cellStyle = { valign: 'middle', border: { type: 'solid' as const, pt: 1, color: 'D9D9D9' }, fontSize: 11, fontFace: 'Arial', margin: [0,5,0,5] };
+    const cellStyle = { valign: 'middle' as const, border: { type: 'solid' as const, pt: 1, color: 'D9D9D9' }, fontSize: 11, fontFace: 'Arial', margin: [0,5,0,5] };
     const metricCellStyle = { ...cellStyle, align: 'left' as const, bold: true, color: '333333' };
     const valueCellStyle = { ...cellStyle, align: 'right' as const, color: '003366', bold: true };
 
@@ -140,7 +140,7 @@ const exportToPptx = (planData: FinancialPlanState, dashboardData: any) => {
     addRow('Break-Even Point (EBITDA)', kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto');
     addRow('Punto di Cassa più Basso', kpis.lowestCashPoint ? `${formatCurrency(kpis.lowestCashPoint.value)} (Mese ${kpis.lowestCashPoint.month})` : 'N/A');
     
-    slide2.addTable(kpiRows, { x: 0.5, y: 1.0, w: 9, colW: [4.5, 4.5], rowH: 0.5 });
+    slide2.addTable(kpiRows as any, { x: 0.5, y: 1.0, w: 9, colW: [4.5, 4.5], rowH: 0.5 });
     
     // SLIDE 3: Chart
     if (dashboardData.monthlyChartData && dashboardData.monthlyChartData.length > 0) {
@@ -178,28 +178,28 @@ const exportToPptx = (planData: FinancialPlanState, dashboardData: any) => {
         const chartTypes: PptxGenJS.IChartMulti[] = [
             {
                 type: 'bar',
-                data: [chartData[0]],
+                data: chartData.slice(0, 1),
                 options: { barDir: 'col', dataLabelColor: 'FFFFFF', dataLabelPosition: 'ctr',
                 fill: '4A86E8', // Blue for Ricavi
               },
             },
             {
                 type: 'line',
-                data: [chartData[1]],
-                options: { lineSmooth: true, lineSize: 3, symbol: 'circle', symbolSize: 6,
+                data: chartData.slice(1, 2),
+                options: { lineSmooth: true, lineSize: 3, lineDataSymbol: 'circle', lineDataSymbolSize: 6,
                 lineColor: 'F6B26B', // Orange for EBITDA
               },
             },
             {
                 type: 'line',
-                data: [chartData[2]],
-                options: { lineSmooth: true, lineSize: 3, symbol: 'triangle', symbolSize: 6, secondaryValAxis: true, valAxisTitle: 'Cassa (€k)', valAxisLabelFormatCode: '#,##0',
+                data: chartData.slice(2, 3),
+                options: { lineSmooth: true, lineSize: 3, lineDataSymbol: 'triangle', lineDataSymbolSize: 6, secondaryValAxis: true, valAxisTitle: 'Cassa (€k)', valAxisLabelFormatCode: '#,##0',
                 lineColor: '6AA84F', // Green for Cassa
               },
             },
         ];
         
-        slide3.addChart(chartTypes, chartOptions);
+        slide3.addChart(chartTypes, chartOptions as any);
     }
     
     // SLIDE 4: Insights
@@ -209,8 +209,8 @@ const exportToPptx = (planData: FinancialPlanState, dashboardData: any) => {
         
         let yPos = 1.2;
         dashboardData.automatedInsights.forEach((insight: any) => {
-            const textArr = pptx.util.getSlideText(insight.description, { w: 8.6, fontFace: 'Arial', fontSize: 12 });
-            const insightHeight = textArr.length * 0.25 + 0.6;
+            const descriptionLines = Math.ceil(insight.description.length / 90); // simple wrap estimation
+            const insightHeight = (descriptionLines * 0.2) + 0.6;
 
             if (yPos + insightHeight > 5.5) {
                 insightSlide = pptx.addSlide();
@@ -227,6 +227,7 @@ const exportToPptx = (planData: FinancialPlanState, dashboardData: any) => {
             insightSlide.addText(insight.description, {
                 x: 0.7, y: yPos, w: 8.6,
                 fontFace: 'Arial', fontSize: 12, color: '333333',
+                autoFit: true,
             });
             yPos += insightHeight;
         });

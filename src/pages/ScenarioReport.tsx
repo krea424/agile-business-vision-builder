@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,9 +11,10 @@ import { CashFlowStatement } from '@/components/FinancialPlan/CashFlowStatement'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ComposedChart, XAxis, YAxis, CartesianGrid, Bar, Line } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
+import { cn } from '@/lib/utils';
 
 const formatCurrency = (value: number) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(value);
-const formatPercentage = (value: number) => new Intl.NumberFormat('it-IT', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value / 100);
+const formatPercentage = (value: number) => new Intl.NumberFormat('it-IT', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value);
 
 // Helper functions copied from components to calculate row-specific values
 const calculateNewClientRevenue = (item: NewClientAcquisition): number => {
@@ -47,15 +47,22 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-    <Card className="mb-6 break-inside-avoid">
-        <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
-        <CardContent>{children}</CardContent>
-    </Card>
+const Section: React.FC<{ title: string; children: React.ReactNode, className?: string }> = ({ title, children, className }) => (
+    <section className={cn("mb-10 break-inside-avoid", className)}>
+        <h2 className="text-2xl font-bold text-primary mb-4 pb-2 border-b-2 border-primary">{title}</h2>
+        <div>{children}</div>
+    </section>
+);
+
+const KpiBox: React.FC<{ title: string; value: string, className?: string }> = ({ title, value, className }) => (
+    <div className={cn("bg-secondary/50 p-4 rounded-lg", className)}>
+        <p className="text-sm text-muted-foreground">{title}</p>
+        <p className="text-2xl font-bold text-primary">{value}</p>
+    </div>
 );
 
 const GeneralAssumptionsDisplay: React.FC<{ data: GeneralAssumptions, formatCurrency: (value: number) => string }> = ({ data, formatCurrency }) => (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-4 text-sm p-4 rounded-lg bg-muted/30">
         <p><strong>Scenario:</strong> {data.scenarioName}</p>
         <p><strong>Orizzonte Temporale:</strong> {data.timeHorizon} anni</p>
         <p><strong>Data Inizio:</strong> {data.startDate}</p>
@@ -92,27 +99,27 @@ const DashboardDisplay: React.FC<{ data: any, planData: FinancialPlanState }> = 
     if (!kpis) return null;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             <div>
-                <h3 className="text-lg font-semibold mb-2">Metriche Chiave</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                    <div><strong>Fabbisogno Finanziario:</strong> {formatCurrencyDisplay(kpis.peakFundingRequirement)}</div>
-                    <div><strong>Valore d'Impresa (a 5 anni):</strong> {formatCurrencyDisplay(kpis.enterpriseValue)}</div>
-                    <div><strong>IRR:</strong> {`${kpis.irr ? (kpis.irr * 100).toFixed(1) : 'N/A'}%`}</div>
-                    <div><strong>Payback Period:</strong> {kpis.paybackPeriodYears ? `${kpis.paybackPeriodYears.toFixed(1)} Anni` : 'N/A'}</div>
-                    <div><strong>Break-Even Point (EBITDA):</strong> {kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto'}</div>
-                    <div><strong>Punto di Cassa più Basso:</strong> {formatCurrencyDisplay(kpis.lowestCashPoint?.value)}</div>
+                <h3 className="text-xl font-semibold mb-4">Metriche Chiave</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <KpiBox title="Fabbisogno Finanziario" value={formatCurrencyDisplay(kpis.peakFundingRequirement)} />
+                    <KpiBox title="Valore d'Impresa (a 5 anni)" value={formatCurrencyDisplay(kpis.enterpriseValue)} />
+                    <KpiBox title="IRR" value={`${kpis.irr ? (kpis.irr * 100).toFixed(1) : 'N/A'}%`} />
+                    <KpiBox title="Payback Period" value={kpis.paybackPeriodYears ? `${kpis.paybackPeriodYears.toFixed(1)} Anni` : 'N/A'} />
+                    <KpiBox title="Break-Even Point (EBITDA)" value={kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto'} />
+                    <KpiBox title="Punto di Cassa più Basso" value={formatCurrencyDisplay(kpis.lowestCashPoint?.value)} />
                 </div>
             </div>
 
             {automatedInsights && automatedInsights.length > 0 && (
                 <div>
-                    <h3 className="text-lg font-semibold mb-2">Insight Automatici</h3>
+                    <h3 className="text-xl font-semibold mb-4">Insight Strategici</h3>
                     <div className="space-y-2">
                         {automatedInsights.map((insight: Insight) => (
                             <Alert variant={insight.variant} key={insight.key}>
                                 {insight.variant === 'destructive' ? <AlertTriangle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
-                                <AlertTitle>{insight.title}</AlertTitle>
+                                <AlertTitle className="font-bold">{insight.title}</AlertTitle>
                                 <AlertDescription>{insight.description}</AlertDescription>
                             </Alert>
                         ))}
@@ -121,7 +128,7 @@ const DashboardDisplay: React.FC<{ data: any, planData: FinancialPlanState }> = 
             )}
             
             <div>
-                <h3 className="text-lg font-semibold mb-2">Andamento Economico e Finanziario</h3>
+                <h3 className="text-xl font-semibold mb-2">Andamento Economico e Finanziario</h3>
                 <div className="h-[400px] w-full">
                     <ChartContainer config={chartConfig} className="h-[400px] w-full">
                         <ComposedChart data={monthlyChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
@@ -195,15 +202,22 @@ const ScenarioReport = () => {
     const handlePrint = () => window.print();
 
     return (
-        <div className="bg-background text-foreground min-h-screen">
-            <div className="container mx-auto p-4 md:p-8">
+        <div className="bg-background text-foreground font-inter">
+            <div className="p-8 print:p-0 mx-auto max-w-5xl">
                 <header className="flex justify-between items-center mb-8 print:hidden">
-                    <h1 className="text-3xl font-bold text-primary">Report Scenario Finanziario</h1>
+                    <h1 className="text-3xl font-bold text-primary">Report Dettagliato</h1>
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={() => navigate(-1)}><ArrowLeft className="mr-2" /> Indietro</Button>
                         <Button onClick={handlePrint}><Printer className="mr-2" /> Stampa</Button>
                     </div>
                 </header>
+                
+                <div className="print:block hidden mb-8 text-center">
+                    <h1 className="text-4xl font-bold text-primary">{planData.general.companyName}</h1>
+                    <p className="text-2xl font-semibold mt-2">Financial Sustainability Plan</p>
+                    <p className="text-lg text-muted-foreground mt-1">Scenario: {planData.general.scenarioName}</p>
+                </div>
+
 
                 <main>
                     <Section title="Executive Summary & Dashboard">

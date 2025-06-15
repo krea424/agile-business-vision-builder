@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -18,31 +18,33 @@
     --popover: 0 0% 100%;
     --popover-foreground: 224 71% 4%;
 
-    --primary: 204 92% 38%; /* McKinsey-like Blue */
+    --primary: 217 91% 60%; /* A slightly brighter, more modern blue */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 20% 97%; /* Lighter grey, adjusted */
-    --secondary-foreground: 224 71% 4%;
+    --secondary: 220 14% 96%; /* Lighter grey for backgrounds */
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 220 20% 97%; /* Adjusted */
-    --muted-foreground: 224 71% 25%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 220 20% 97%; /* Adjusted */
-    --accent-foreground: 224 71% 4%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 222 47% 11%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 90%; /* Softer border */
-    --input: 220 15% 90%; /* Softer border */
-    --ring: 204 92% 38%;
+    --border: 220 13% 91%; /* Softer border */
+    --input: 220 13% 91%; /* Softer border */
+    --ring: 217 91% 60%;
 
     --radius: 0.5rem; /* Slightly smaller radius for a sharper, more modern look */
 
     /* Chart specific colors */
-    --chart-revenue: 204 92% 38%; /* same as primary */
-    --chart-ebitda: 28 100% 50%; /* Orange */
-    --chart-cash: 145 63% 42%; /* Green */
+    --chart-revenue: 217 91% 60%; /* Primary Blue */
+    --chart-ebitda: 22 91% 60%; /* A clear orange */
+    --chart-cash: 160 84% 39%; /* A rich green */
+    --chart-accent: 270 91% 60%; /* A deep purple for contrast */
+
 
     --sidebar-background: 0 0% 98%;
 
@@ -62,38 +64,39 @@
   }
 
   .dark {
-    --background: 220 18% 11%;
+    --background: 222 47% 11%;
     --foreground: 0 0% 98%;
 
-    --card: 220 18% 15%;
+    --card: 222 47% 15%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 220 18% 11%;
+    --popover: 222 47% 11%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 204 92% 55%;
-    --primary-foreground: 224 71% 4%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
 
-    --secondary: 220 18% 20%;
+    --secondary: 217 33% 17%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 18% 20%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 220 18% 20%;
+    --accent: 217 33% 17%;
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 18% 25%;
-    --input: 220 18% 25%;
-    --ring: 204 92% 55%;
+    --border: 217 33% 27%;
+    --input: 217 33% 27%;
+    --ring: 217 91% 60%;
 
     /* Chart specific colors */
-    --chart-revenue: 204 92% 55%;
-    --chart-ebitda: 28 100% 60%;
-    --chart-cash: 145 58% 55%;
+    --chart-revenue: 217 91% 60%;
+    --chart-ebitda: 22 91% 60%;
+    --chart-cash: 160 74% 49%;
+    --chart-accent: 270 91% 70%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -112,6 +115,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-lato;
+    @apply bg-background text-foreground font-inter;
   }
 }
+
