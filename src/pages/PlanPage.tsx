@@ -14,6 +14,7 @@ import { IncomeStatement } from '@/components/FinancialPlan/IncomeStatement';
 import { calculateFinancialSummary } from '@/components/FinancialPlan/financialCalculator';
 import { CashFlowStatement } from '@/components/FinancialPlan/CashFlowStatement';
 import { calculateCashFlowSummary } from '@/components/FinancialPlan/cashFlowCalculator';
+import { calculateDashboardData } from '@/components/FinancialPlan/dashboardCalculator';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -135,8 +136,17 @@ const PlanPage = () => {
     }
   }, [planData, financialSummary]);
 
+  const dashboardData = useMemo(() => {
+    try {
+      return calculateDashboardData(planData, financialSummary, cashFlowSummary);
+    } catch (error) {
+      console.error("Error calculating dashboard data:", error);
+      return { kpis: {}, monthlyChartData: [], automatedInsights: [] };
+    }
+  }, [planData, financialSummary, cashFlowSummary]);
+
   const navigate = useNavigate();
-  const handleExport = () => navigate('/report', { state: { planData, financialSummary, cashFlowSummary } });
+  const handleExport = () => navigate('/report', { state: { planData, financialSummary, cashFlowSummary, dashboardData } });
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">

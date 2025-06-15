@@ -1,12 +1,15 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Printer } from 'lucide-react';
-import { GeneralAssumptions, RecoverableClient, NewClientAcquisition, DirectlyAcquiredClient, PersonnelCost, FixedCost, VariableCost, InitialInvestment } from '@/components/FinancialPlan/types';
+import { ArrowLeft, Printer, AlertTriangle, Info } from 'lucide-react';
+import { FinancialPlanState, GeneralAssumptions, RecoverableClient, NewClientAcquisition, DirectlyAcquiredClient, PersonnelCost, FixedCost, VariableCost, InitialInvestment } from '@/components/FinancialPlan/types';
+import { Insight } from '@/components/FinancialPlan/dashboardCalculator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { IncomeStatement } from '@/components/FinancialPlan/IncomeStatement';
 import { CashFlowStatement } from '@/components/FinancialPlan/CashFlowStatement';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend, Bar, Line } from 'recharts';
 
 const formatCurrency = (value: number) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(value);
 const formatPercentage = (value: number) => new Intl.NumberFormat('it-IT', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value / 100);
@@ -60,17 +63,79 @@ const GeneralAssumptionsDisplay: React.FC<{ data: GeneralAssumptions, formatCurr
     </div>
 );
 
+const DashboardDisplay: React.FC<{ data: any, planData: FinancialPlanState }> = ({ data, planData }) => {
+    const { kpis, monthlyChartData, automatedInsights } = data;
+
+    const formatCurrencyDisplay = (value: number | undefined) => {
+        if (value === undefined || value === null) return "N/A";
+        return new Intl.NumberFormat('it-IT', { style: 'currency', currency: planData.general.currency || 'EUR', maximumFractionDigits: 0 }).format(value);
+    }
+    const formatCurrencyForChart = (value: number) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
+
+    if (!kpis) return null;
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <h3 className="text-lg font-semibold mb-2">Metriche Chiave</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                    <div><strong>Fabbisogno Finanziario:</strong> {formatCurrencyDisplay(kpis.peakFundingRequirement)}</div>
+                    <div><strong>Valore d'Impresa (a 5 anni):</strong> {formatCurrencyDisplay(kpis.enterpriseValue)}</div>
+                    <div><strong>IRR:</strong> {`${kpis.irr ? (kpis.irr * 100).toFixed(1) : 'N/A'}%`}</div>
+                    <div><strong>Payback Period:</strong> {kpis.paybackPeriodYears ? `${kpis.paybackPeriodYears.toFixed(1)} Anni` : 'N/A'}</div>
+                    <div><strong>Break-Even Point (EBITDA):</strong> {kpis.breakEvenMonth ? `Mese ${kpis.breakEvenMonth}` : 'Non raggiunto'}</div>
+                    <div><strong>Punto di Cassa più Basso:</strong> {formatCurrencyDisplay(kpis.lowestCashPoint?.value)}</div>
+                </div>
+            </div>
+
+            {automatedInsights && automatedInsights.length > 0 && (
+                <div>
+                    <h3 className="text-lg font-semibold mb-2">Insight Automatici</h3>
+                    <div className="space-y-2">
+                        {automatedInsights.map((insight: Insight) => (
+                            <Alert variant={insight.variant} key={insight.key}>
+                                {insight.variant === 'destructive' ? <AlertTriangle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
+                                <AlertTitle>{insight.title}</AlertTitle>
+                                <AlertDescription>{insight.description}</AlertDescription>
+                            </Alert>
+                        ))}
+                    </div>
+                </div>
+            )}
+            
+            <div>
+                <h3 className="text-lg font-semibold mb-2">Andamento Economico e Finanziario</h3>
+                <div className="h-[400px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <ComposedChart data={monthlyChartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis yAxisId="left" stroke="#8884d8" tickFormatter={(value) => formatCurrencyForChart(value).replace('€', '€ ')} />
+                            <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" tickFormatter={(value) => formatCurrencyForChart(value).replace('€', '€ ')} />
+                            <Tooltip formatter={(value: number) => formatCurrencyForChart(value)} />
+                            <Legend />
+                            <Bar dataKey="Ricavi" yAxisId="left" fill="#8884d8" name="Ricavi" />
+                            <Line type="monotone" dataKey="EBITDA" yAxisId="left" stroke="#ff7300" name="EBITDA" />
+                            <Line type="monotone" dataKey="Cassa Finale" yAxisId="right" stroke="#82ca9d" name="Cassa Finale" />
+                        </ComposedChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const ScenarioReport = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { planData, financialSummary, cashFlowSummary } = location.state || {};
+    const { planData, financialSummary, cashFlowSummary, dashboardData } = location.state || {};
 
     const formatCurrency = (value: number) => {
         if (typeof value !== 'number' || isNaN(value)) return '';
         return new Intl.NumberFormat('it-IT', { style: 'currency', currency: planData?.general?.currency || 'EUR' }).format(value);
     };
 
-    if (!planData) {
+    if (!planData || !financialSummary || !cashFlowSummary || !dashboardData) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen gap-4">
                 <p>Dati non disponibili per generare il report.</p>
@@ -93,6 +158,10 @@ const ScenarioReport = () => {
                 </header>
 
                 <main>
+                    <Section title="Executive Summary & Dashboard">
+                        <DashboardDisplay data={dashboardData} planData={planData} />
+                    </Section>
+                    
                     <Section title="1. Assunzioni Generali"><GeneralAssumptionsDisplay data={planData.general} formatCurrency={formatCurrency} /></Section>
                     
                     <Section title="2.1 Ricavi: Clienti da Recuperare">

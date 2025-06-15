@@ -1,4 +1,3 @@
-
 import { FinancialPlanState, YearlyData, CashFlowYearlyData } from './types';
 
 // Simple IRR calculation using the Newton-Raphson method
@@ -23,11 +22,98 @@ function calculateIRR(cashFlows: number[], guess = 0.1): number {
     return x0;
 }
 
+const formatCurrency = (value: number | undefined) => {
+    if (value === undefined || value === null) return "N/A";
+    return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
+}
+
+export type Insight = {
+    key: string;
+    variant: "default" | "destructive";
+    title: string;
+    description: string;
+};
+
+export const generateAutomatedInsights = (plan: FinancialPlanState, kpis: any, yearlyFinancials: YearlyData[]): Insight[] => {
+    const insights: Insight[] = [];
+
+    if (!plan || !kpis || !yearlyFinancials || yearlyFinancials.length === 0) {
+      return [];
+    }
+
+    const year1Summary = yearlyFinancials[0];
+
+    // Insight 1: Liquidity Risk
+    const equityInjection = plan.general.equityInjection || 0;
+    if (kpis.peakFundingRequirement && kpis.peakFundingRequirement > equityInjection) {
+      const shortfall = kpis.peakFundingRequirement - equityInjection;
+      insights.push({
+        key: "liquidity-risk",
+        variant: "destructive",
+        title: "Rischio di Liquidità",
+        description: `Il capitale versato (${formatCurrency(equityInjection)}) non basta a coprire il fabbisogno di ${formatCurrency(kpis.peakFundingRequirement)}. Necessario un ulteriore finanziamento di ${formatCurrency(shortfall)} o una revisione dei costi.`
+      });
+    }
+    
+    // Insight 2: Cash Cycle
+    const netTradeCycle = (plan.general.daysToCollectReceivables || 0) - (plan.general.daysToPayPayables || 0);
+    if (netTradeCycle > 60) {
+        insights.push({
+            key: "cash-cycle",
+            variant: "default",
+            title: "Insight: Ciclo di Cassa",
+            description: `Il ciclo di cassa (${netTradeCycle.toFixed(0)} giorni) è lungo. Valutare di ritardare i pagamenti o accelerare gli incassi per migliorare la liquidità.`
+        });
+    }
+
+    // Insight 3: Cost Structure
+    if (year1Summary) {
+        const totalCosts1 = year1Summary.personnelCosts + year1Summary.fixedCosts + year1Summary.variableCosts + year1Summary.marketingCosts;
+        if (totalCosts1 > 0) {
+            const personnelCostRatio = year1Summary.personnelCosts / totalCosts1;
+            if (personnelCostRatio > 0.7) {
+                insights.push({
+                    key: "cost-structure",
+                    variant: "default",
+                    title: "Insight: Struttura dei Costi",
+                    description: `I costi del personale rappresentano il ${(personnelCostRatio * 100).toFixed(0)}% dei costi totali. Valutare l'impatto di aumenti salariali inattesi.`
+                });
+            }
+        }
+    }
+
+    // Insight 4: Sustainability Risk
+    if (yearlyFinancials.length > 1) {
+        const year2Summary = yearlyFinancials[1];
+        if (year1Summary && year2Summary) {
+            const totalCosts1 = year1Summary.personnelCosts + year1Summary.fixedCosts + year1Summary.variableCosts + year1Summary.marketingCosts;
+            const totalCosts2 = year2Summary.personnelCosts + year2Summary.fixedCosts + year2Summary.variableCosts + year2Summary.marketingCosts;
+
+            if (year1Summary.revenues > 0 && totalCosts1 > 0) {
+                const revenueGrowth = (year2Summary.revenues - year1Summary.revenues) / year1Summary.revenues;
+                const costGrowth = (totalCosts2 - totalCosts1) / totalCosts1;
+                
+                if (costGrowth > revenueGrowth) {
+                    insights.push({
+                        key: "sustainability-risk",
+                        variant: "destructive",
+                        title: "Rischio di Sostenibilità",
+                        description: `I costi (${(costGrowth * 100).toFixed(1)}%) crescono più dei ricavi (${(revenueGrowth * 100).toFixed(1)}%). Rivedere il pricing o l'efficienza dei costi.`
+                    });
+                }
+            }
+        }
+    }
+
+    return insights;
+};
+
 export const calculateDashboardData = (plan: FinancialPlanState, yearlyFinancials: YearlyData[], yearlyCashFlow: CashFlowYearlyData[]) => {
     if (!plan || yearlyFinancials.length === 0 || yearlyCashFlow.length === 0) {
         return {
             kpis: {},
-            monthlyChartData: []
+            monthlyChartData: [],
+            automatedInsights: []
         };
     }
     
@@ -108,15 +194,20 @@ export const calculateDashboardData = (plan: FinancialPlanState, yearlyFinancial
     const paybackMonthData = monthlyData.find(d => d.cumulativeFcf > 0);
     const paybackPeriodYears = paybackMonthData ? paybackMonthData.month / 12 : null;
 
+    const kpis = {
+        peakFundingRequirement: peakFundingReq,
+        paybackPeriodYears: paybackPeriodYears,
+        irr: irr,
+        enterpriseValue: enterpriseValue,
+        breakEvenMonth: breakEvenMonth,
+        lowestCashPoint: lowestCashPoint,
+    };
+    
+    const automatedInsights = generateAutomatedInsights(plan, kpis, yearlyFinancials);
+
     return {
-        kpis: {
-            peakFundingRequirement: peakFundingReq,
-            paybackPeriodYears: paybackPeriodYears,
-            irr: irr,
-            enterpriseValue: enterpriseValue,
-            breakEvenMonth: breakEvenMonth,
-            lowestCashPoint: lowestCashPoint,
-        },
+        kpis,
         monthlyChartData: monthlyData.map(d => ({ name: `M${d.month}`, Ricavi: d.revenue, EBITDA: d.ebitda, 'Cassa Finale': d.endingCash })),
+        automatedInsights,
     };
 };

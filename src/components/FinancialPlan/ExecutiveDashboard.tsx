@@ -1,10 +1,9 @@
-
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FinancialPlanState } from '@/components/FinancialPlan/types';
 import { calculateFinancialSummary } from '@/components/FinancialPlan/financialCalculator';
 import { calculateCashFlowSummary } from '@/components/FinancialPlan/cashFlowCalculator';
-import { calculateDashboardData } from './dashboardCalculator';
+import { calculateDashboardData, Insight } from './dashboardCalculator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend, Bar, Line } from 'recharts';
@@ -43,89 +42,7 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
   const cashFlowSummary = useMemo(() => calculateCashFlowSummary(planData, financialSummary), [planData, financialSummary]);
   const dashboardData = useMemo(() => calculateDashboardData(planData, financialSummary, cashFlowSummary), [planData, financialSummary, cashFlowSummary]);
   
-  const { kpis, monthlyChartData } = dashboardData;
-
-  const automatedInsights = useMemo(() => {
-    const insights: React.ReactNode[] = [];
-
-    if (!planData || !kpis || !financialSummary || financialSummary.length === 0) {
-      return [];
-    }
-    
-    // Insight 1: Liquidity Risk
-    const equityInjection = planData.general.equityInjection || 0;
-    if (kpis.peakFundingRequirement && kpis.peakFundingRequirement > equityInjection) {
-      const shortfall = kpis.peakFundingRequirement - equityInjection;
-      insights.push(
-        <Alert variant="destructive" key="liquidity-risk" className="col-span-1 md:col-span-2 lg:col-span-1">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Rischio di Liquidità</AlertTitle>
-          <AlertDescription>
-            Il capitale versato ({formatCurrency(equityInjection)}) non basta a coprire il fabbisogno di {formatCurrency(kpis.peakFundingRequirement)}.
-            {' '}
-            Necessario un ulteriore finanziamento di {formatCurrency(shortfall)} o una revisione dei costi.
-          </AlertDescription>
-        </Alert>
-      );
-    }
-    
-    // Insight 2: Cash Cycle
-    const netTradeCycle = (planData.general.daysToCollectReceivables || 0) - (planData.general.daysToPayPayables || 0);
-    if (netTradeCycle > 60) {
-        insights.push(
-            <Alert key="cash-cycle" className="col-span-1 md:col-span-2 lg:col-span-1">
-                <Info className="h-4 w-4" />
-                <AlertTitle>Insight: Ciclo di Cassa</AlertTitle>
-                <AlertDescription>
-                    Il ciclo di cassa ({netTradeCycle.toFixed(0)} giorni) è lungo. Valutare di ritardare i pagamenti o accelerare gli incassi per migliorare la liquidità.
-                </AlertDescription>
-            </Alert>
-        );
-    }
-
-    // Insight 3: Cost Structure
-    const year1Summary = financialSummary[0];
-    const totalCosts1 = year1Summary.personnelCosts + year1Summary.fixedCosts + year1Summary.variableCosts + year1Summary.marketingCosts;
-    if (totalCosts1 > 0) {
-        const personnelCostRatio = year1Summary.personnelCosts / totalCosts1;
-        if (personnelCostRatio > 0.7) {
-            insights.push(
-                <Alert key="cost-structure" className="col-span-1 md:col-span-2 lg:col-span-1">
-                    <Info className="h-4 w-4" />
-                    <AlertTitle>Insight: Struttura dei Costi</AlertTitle>
-                    <AlertDescription>
-                        I costi del personale rappresentano il {(personnelCostRatio * 100).toFixed(0)}% dei costi totali. Valutare l&apos;impatto di aumenti salariali inattesi.
-                    </AlertDescription>
-                </Alert>
-            );
-        }
-    }
-
-    // Insight 4: Sustainability Risk
-    if (financialSummary.length > 1) {
-        const year2Summary = financialSummary[1];
-        const totalCosts2 = year2Summary.personnelCosts + year2Summary.fixedCosts + year2Summary.variableCosts + year2Summary.marketingCosts;
-
-        if (year1Summary.revenues > 0 && totalCosts1 > 0) {
-            const revenueGrowth = (year2Summary.revenues - year1Summary.revenues) / year1Summary.revenues;
-            const costGrowth = (totalCosts2 - totalCosts1) / totalCosts1;
-            
-            if (costGrowth > revenueGrowth) {
-                insights.push(
-                    <Alert variant="destructive" key="sustainability-risk" className="col-span-1 md:col-span-2 lg:col-span-1">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Rischio di Sostenibilità</AlertTitle>
-                        <AlertDescription>
-                            I costi ({ (costGrowth * 100).toFixed(1) }%) crescono più dei ricavi ({ (revenueGrowth * 100).toFixed(1) }%). Rivedere il pricing o l&apos;efficienza dei costi.
-                        </AlertDescription>
-                    </Alert>
-                );
-            }
-        }
-    }
-
-    return insights;
-  }, [planData, kpis, financialSummary]);
+  const { kpis, monthlyChartData, automatedInsights } = dashboardData;
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-secondary via-background to-background dark:from-black/10 dark:via-background dark:to-background">
@@ -152,11 +69,17 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
             <KpiCard title="Punto di Cassa più Basso" value={formatCurrency(kpis.lowestCashPoint?.value)} description={kpis.lowestCashPoint ? `Raggiunto al mese ${kpis.lowestCashPoint.month}` : ''} icon={ArrowDown} />
         </div>
 
-        {automatedInsights.length > 0 && (
+        {automatedInsights && automatedInsights.length > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-bold tracking-tight mb-4 text-primary">Insight Automatici</h2>
             <div className="grid gap-4 md:grid-cols-2">
-                {automatedInsights}
+                {automatedInsights.map((insight: Insight) => (
+                    <Alert variant={insight.variant} key={insight.key} className="col-span-1 md:col-span-2 lg:col-span-1">
+                        {insight.variant === 'destructive' ? <AlertTriangle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
+                        <AlertTitle>{insight.title}</AlertTitle>
+                        <AlertDescription>{insight.description}</AlertDescription>
+                    </Alert>
+                ))}
             </div>
           </div>
         )}
