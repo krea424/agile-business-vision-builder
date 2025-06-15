@@ -44,7 +44,8 @@ export function IncomeStatement({ data }: Props) {
   const tableHeaders = ["Voce", ...data.map(d => `Anno ${d.year}`)];
   const rows: { label: string; key: keyof YearlyData; isBold?: boolean; isHighlighted?: boolean }[] = [
     { label: "Ricavi da Clienti Recuperati", key: 'recoverableClientRevenues' },
-    { label: "Ricavi da Nuovi Clienti", key: 'newClientRevenues' },
+    { label: "Ricavi da Nuovi Clienti (Marketing)", key: 'newClientRevenues' },
+    { label: "Ricavi da Clienti Diretti", key: 'directlyAcquiredClientRevenues' },
     { label: "Ricavi Totali", key: 'revenues', isBold: true },
     { label: "Costi del Personale", key: 'personnelCosts' },
     { label: "Costi Fissi Operativi", key: 'fixedCosts' },

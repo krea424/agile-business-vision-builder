@@ -47,7 +47,7 @@ export function NewClients({ data, setData }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Ipotesi Ricavi: Nuovi Clienti</CardTitle>
+        <CardTitle>Ipotesi Ricavi: Nuovi Clienti (da Marketing)</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>

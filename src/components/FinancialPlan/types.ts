@@ -29,6 +29,16 @@ export interface NewClientAcquisition {
   startMonth: number;
 }
 
+export interface DirectlyAcquiredClient {
+  id: string;
+  name: string;
+  numberOfClients: number;
+  startMonth: number;
+  serviceType: 'ricorrente' | 'una_tantum';
+  annualContractValue: number;
+  monthlyContractValue: number;
+}
+
 export interface PersonnelCost {
   id: string;
   role: string;
@@ -60,6 +70,7 @@ export interface FinancialPlanState {
   general: GeneralAssumptions;
   recoverableClients: RecoverableClient[];
   newClients: NewClientAcquisition[];
+  directlyAcquiredClients: DirectlyAcquiredClient[];
   personnelCosts: PersonnelCost[];
   fixedCosts: FixedCost[];
   variableCosts: VariableCost[];
@@ -71,6 +82,7 @@ export interface YearlyData {
   revenues: number;
   recoverableClientRevenues: number;
   newClientRevenues: number;
+  directlyAcquiredClientRevenues: number;
   personnelCosts: number;
   fixedCosts: number;
   variableCosts: number;

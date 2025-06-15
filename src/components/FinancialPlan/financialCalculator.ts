@@ -2,8 +2,8 @@
 import { FinancialPlanState, YearlyData } from './types';
 
 export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[] {
-  const { general, recoverableClients, newClients, personnelCosts, fixedCosts, variableCosts, initialInvestments } = plan;
-  if (!general || !recoverableClients || !newClients || !personnelCosts || !fixedCosts || !variableCosts || !initialInvestments) {
+  const { general, recoverableClients, newClients, directlyAcquiredClients, personnelCosts, fixedCosts, variableCosts, initialInvestments } = plan;
+  if (!general || !recoverableClients || !newClients || !directlyAcquiredClients || !personnelCosts || !fixedCosts || !variableCosts || !initialInvestments) {
       return [];
   }
   
@@ -54,6 +54,28 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
       }
     });
 
+    let directlyAcquiredClientRevenuesThisYear = 0;
+    if (directlyAcquiredClients) {
+      directlyAcquiredClients.forEach(client => {
+        const startMonth = client.startMonth;
+        const monthsOfActivity = getMonthsOfActivity(startMonth);
+        if (client.serviceType === 'una_tantum') {
+          let chargeYear = 1;
+          let cumulativeMonths = monthsInFirstYear;
+          while (startMonth > cumulativeMonths) {
+              chargeYear++;
+              cumulativeMonths += 12;
+          }
+          if (year === chargeYear) {
+              directlyAcquiredClientRevenuesThisYear += client.numberOfClients * client.annualContractValue;
+          }
+        } else { // ricorrente
+          const annualRevenue = client.numberOfClients * client.monthlyContractValue * 12;
+          directlyAcquiredClientRevenuesThisYear += (annualRevenue / 12) * monthsOfActivity;
+        }
+      });
+    }
+
     let newClientRevenueGeneratedThisYear = 0;
     newClients.forEach(channel => {
         const monthsOfActivity = getMonthsOfActivity(channel.startMonth);
@@ -65,7 +87,7 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
 
     cumulativeNewClientRevenue += newClientRevenueGeneratedThisYear;
     
-    const totalRevenues = recoverableRevenueThisYear + cumulativeNewClientRevenue;
+    const totalRevenues = recoverableRevenueThisYear + cumulativeNewClientRevenue + directlyAcquiredClientRevenuesThisYear;
 
     // --- COSTS ---
     let personnelCostThisYear = 0;
@@ -104,6 +126,7 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
       revenues: totalRevenues,
       recoverableClientRevenues: recoverableRevenueThisYear,
       newClientRevenues: cumulativeNewClientRevenue,
+      directlyAcquiredClientRevenues: directlyAcquiredClientRevenuesThisYear,
       personnelCosts: personnelCostThisYear,
       fixedCosts: fixedCostsThisYear,
       variableCosts: variableCostsThisYear,

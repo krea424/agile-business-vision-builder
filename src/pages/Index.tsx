@@ -1,10 +1,10 @@
-
 import { useState, useMemo } from 'react';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { FinancialPlanState } from '@/components/FinancialPlan/types';
 import { GeneralAssumptions } from '@/components/FinancialPlan/GeneralAssumptions';
 import { RecoverableClients } from '@/components/FinancialPlan/RecoverableClients';
 import { NewClients } from '@/components/FinancialPlan/NewClients';
+import { DirectlyAcquiredClients } from '@/components/FinancialPlan/DirectlyAcquiredClients';
 import { PersonnelCosts } from '@/components/FinancialPlan/PersonnelCosts';
 import { OperationalInvestments } from '@/components/FinancialPlan/OperationalInvestments';
 import { IncomeStatement } from '@/components/FinancialPlan/IncomeStatement';
@@ -37,6 +37,7 @@ const initialPlanState: FinancialPlanState = {
   newClients: [
       { id: '1', channel: 'Commerciale', monthlyMarketingInvestment: 1000, leadsPer100Invested: 5, conversionRate: 10, averageAnnualContractValue: 15000, startMonth: 1 },
   ],
+  directlyAcquiredClients: [],
   personnelCosts: [
     { id: '1', role: 'Visurista Esperto 1', annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
     { id: '2', role: 'Visurista Esperto 2', annualGrossSalary: 27800, companyCostCoefficient: 1.5, hiringMonth: 1 },
@@ -71,6 +72,7 @@ const Index = () => {
   const setGeneral = (data: FinancialPlanState['general']) => setPlanData(prev => ({...prev, general: data}));
   const setRecoverableClients = (data: FinancialPlanState['recoverableClients']) => setPlanData(prev => ({...prev, recoverableClients: data}));
   const setNewClients = (data: FinancialPlanState['newClients']) => setPlanData(prev => ({...prev, newClients: data}));
+  const setDirectlyAcquiredClients = (data: FinancialPlanState['directlyAcquiredClients']) => setPlanData(prev => ({...prev, directlyAcquiredClients: data}));
   const setPersonnelCosts = (data: FinancialPlanState['personnelCosts']) => setPlanData(prev => ({...prev, personnelCosts: data}));
   const setFixedCosts = (data: FinancialPlanState['fixedCosts']) => setPlanData(prev => ({...prev, fixedCosts: data}));
   const setVariableCosts = (data: FinancialPlanState['variableCosts']) => setPlanData(prev => ({...prev, variableCosts: data}));
@@ -128,6 +130,7 @@ const Index = () => {
           <TabsContent value="revenues" className="space-y-6">
             <RecoverableClients data={planData.recoverableClients} setData={setRecoverableClients} />
             <NewClients data={planData.newClients} setData={setNewClients} />
+            <DirectlyAcquiredClients data={planData.directlyAcquiredClients} setData={setDirectlyAcquiredClients} />
           </TabsContent>
 
           <TabsContent value="costs" className="space-y-6">
