@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { FinancialPlanState } from '@/components/FinancialPlan/types';
 import { GeneralAssumptions } from '@/components/FinancialPlan/GeneralAssumptions';
@@ -7,6 +6,8 @@ import { RecoverableClients } from '@/components/FinancialPlan/RecoverableClient
 import { NewClients } from '@/components/FinancialPlan/NewClients';
 import { PersonnelCosts } from '@/components/FinancialPlan/PersonnelCosts';
 import { OperationalInvestments } from '@/components/FinancialPlan/OperationalInvestments';
+import { IncomeStatement } from '@/components/FinancialPlan/IncomeStatement';
+import { calculateFinancialSummary } from '@/components/FinancialPlan/financialCalculator';
 
 const initialPlanState: FinancialPlanState = {
   general: {
@@ -60,6 +61,15 @@ const Index = () => {
   const setVariableCosts = (data: FinancialPlanState['variableCosts']) => setPlanData(prev => ({...prev, variableCosts: data}));
   const setInitialInvestments = (data: FinancialPlanState['initialInvestments']) => setPlanData(prev => ({...prev, initialInvestments: data}));
 
+  const financialSummary = useMemo(() => {
+    try {
+      return calculateFinancialSummary(planData);
+    } catch (error) {
+      console.error("Error calculating financial summary:", error);
+      return [];
+    }
+  }, [planData]);
+
   return (
     <div className="container mx-auto p-4 md:p-8">
       <header className="mb-8">
@@ -95,6 +105,13 @@ const Index = () => {
                 setVariableCosts={setVariableCosts}
                 setInitialInvestments={setInitialInvestments}
             />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-4">
+          <AccordionTrigger className="text-xl font-semibold">4. Conto Economico Proiettato</AccordionTrigger>
+          <AccordionContent>
+            <IncomeStatement data={financialSummary} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

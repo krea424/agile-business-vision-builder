@@ -1,4 +1,3 @@
-
 export interface GeneralAssumptions {
   timeHorizon: number;
   startDate: string;
@@ -60,4 +59,20 @@ export interface FinancialPlanState {
   fixedCosts: FixedCost[];
   variableCosts: VariableCost[];
   initialInvestments: InitialInvestment[];
+}
+
+export interface YearlyData {
+  year: number;
+  revenues: number;
+  recoverableClientRevenues: number;
+  newClientRevenues: number;
+  personnelCosts: number;
+  fixedCosts: number;
+  variableCosts: number;
+  marketingCosts: number;
+  ebitda: number;
+  amortization: number;
+  ebit: number;
+  taxes: number;
+  netProfit: number;
 }
