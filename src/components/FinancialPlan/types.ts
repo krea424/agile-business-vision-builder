@@ -36,6 +36,10 @@ export interface RecoverableClient {
   serviceType: 'ricorrente' | 'una_tantum';
   recoveryAmountPercentage: number;
   annualIncreasePercentage: number;
+  contractDurationMonths?: number;
+  renewalProbability?: number;
+  activationRampUpMonths?: number;
+  specificCollectionDays?: number;
 }
 
 export interface NewClientAcquisition {

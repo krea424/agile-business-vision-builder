@@ -1,4 +1,3 @@
-
 import { FinancialPlanState, YearlyData } from './types';
 
 export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[] {
@@ -59,8 +58,18 @@ export function calculateFinancialSummary(plan: FinancialPlanState): YearlyData[
             recoverableRevenueThisYear += annualPotentialRevenue;
         }
       } else { // ricorrente
-        const monthsOfActivity = getMonthsOfActivity(startMonth);
-        recoverableRevenueThisYear += (annualPotentialRevenue / 12) * monthsOfActivity;
+        // Implement logic for contract duration
+        const durationMonths = client.contractDurationMonths || (general.timeHorizon * 12);
+        const contractEndMonth = startMonth + durationMonths - 1;
+
+        const firstMonthOfActivity = Math.max(startMonth, firstMonthOfCurrentYear);
+        const lastMonthOfActivity = Math.min(contractEndMonth, lastMonthOfCurrentYear);
+
+        if (lastMonthOfActivity >= firstMonthOfActivity) {
+            const monthsOfActivity = lastMonthOfActivity - firstMonthOfActivity + 1;
+            recoverableRevenueThisYear += (annualPotentialRevenue / 12) * monthsOfActivity;
+        }
+        // NOTE: Renewal, ramp-up and other complex logic will be added in next steps.
       }
     });
 
