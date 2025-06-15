@@ -123,12 +123,16 @@ export function PersonnelCosts({ data, setData }: Props) {
                 const companyCostCoefficient = item.companyCostCoefficient || 1;
                 const monthlyCost = item.monthlyCost || 0;
 
-                const costoAnnuoAzienda = isDipendente 
+                let costoAnnuoAzienda = isDipendente 
                   ? annualGrossSalary * companyCostCoefficient
                   : monthlyCost * 12;
+                
+                if (isDipendente && item.bonusType === 'Importo Fisso Annuo') {
+                    costoAnnuoAzienda += (item.bonusValue || 0);
+                }
                   
                 const costoMensileAzienda = isDipendente
-                  ? (annualGrossSalary * companyCostCoefficient) / 12
+                  ? costoAnnuoAzienda / 12
                   : monthlyCost;
 
                 return (
