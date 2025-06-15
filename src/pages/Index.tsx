@@ -143,7 +143,7 @@ const Index = () => {
       <div className="container mx-auto p-4 md:p-8 lg:p-12">
         <header className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">Financial Sustainability Plan</h1>
-          <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">Il suo simulatore di volo per testare le decisioni strategiche.</p>
+          <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">Simulatore di volo per testare le decisioni strategiche.</p>
         </header>
         
         <div className="flex justify-between items-center mb-6">
