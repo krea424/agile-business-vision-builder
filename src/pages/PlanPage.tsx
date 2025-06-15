@@ -15,14 +15,10 @@ import { calculateFinancialSummary } from '@/components/FinancialPlan/financialC
 import { CashFlowStatement } from '@/components/FinancialPlan/CashFlowStatement';
 import { calculateCashFlowSummary } from '@/components/FinancialPlan/cashFlowCalculator';
 import { calculateDashboardData } from '@/components/FinancialPlan/dashboardCalculator';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Menu, Save, Home } from "lucide-react";
+import { Save, Home, ArrowLeft, ArrowRight, Info } from "lucide-react";
+import { Stepper } from '@/components/ui/stepper';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const initialPlanState: FinancialPlanState = {
   general: {
@@ -107,7 +103,22 @@ const PlanPage = () => {
     }
   }, [planData]);
   
-  const [activeTab, setActiveTab] = useState('general');
+  const steps = ['Generali', 'Ricavi', 'Costi', 'C. Economico', 'Flusso di Cassa'];
+  const tabMapping = ['general', 'revenues', 'costs', 'income', 'cashflow'];
+  const [activeStep, setActiveStep] = useState(0);
+  const activeTab = tabMapping[activeStep];
+
+  const handleNext = () => {
+      if (activeStep < steps.length - 1) {
+          setActiveStep(prev => prev + 1);
+      }
+  };
+
+  const handlePrev = () => {
+      if (activeStep > 0) {
+          setActiveStep(prev => prev - 1);
+      }
+  };
 
   const setGeneral = (data: FinancialPlanState['general']) => setPlanData(prev => ({...prev, general: data}));
   const setRecoverableClients = (data: FinancialPlanState['recoverableClients']) => setPlanData(prev => ({...prev, recoverableClients: data}));
@@ -156,43 +167,74 @@ const PlanPage = () => {
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">Simulatore di volo per testare le decisioni strategiche.</p>
         </header>
         
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/')}>
-              <Home className="mr-2 h-4 w-4" /> Dashboard
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  <Menu className="mr-2 h-4 w-4" /> Seleziona Sezione
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onSelect={() => setActiveTab('general')}>1. Generali</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setActiveTab('revenues')}>2. Ricavi</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setActiveTab('costs')}>3. Costi</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setActiveTab('income')}>4. C. Economico</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setActiveTab('cashflow')}>5. Flusso di Cassa</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <Button onClick={handleExport}>
-            <Save className="mr-2 h-4 w-4" /> Salva ed Esporta Scenario
-          </Button>
+        <div className="mb-12">
+            <Stepper steps={steps} currentStep={activeStep} />
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="flex justify-between items-center mb-6">
+          <Button variant="outline" onClick={() => navigate('/')}>
+            <Home className="mr-2 h-4 w-4" /> Dashboard
+          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handlePrev} disabled={activeStep === 0} variant="outline">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Indietro
+            </Button>
+            {activeStep < steps.length - 1 ? (
+                 <Button onClick={handleNext}>
+                     Avanti <ArrowRight className="ml-2 h-4 w-4" />
+                 </Button>
+            ) : (
+                 <Button onClick={handleExport}>
+                     <Save className="mr-2 h-4 w-4" /> Salva ed Esporta Scenario
+                 </Button>
+            )}
+           </div>
+        </div>
+
+        <Tabs value={activeTab} className="w-full">
           <TabsContent value="general">
+            <Alert className="mb-6">
+                <Info className="h-4 w-4" />
+                <AlertTitle>1. Ipotesi Generali</AlertTitle>
+                <AlertDescription>
+                    Benvenuto! Inizia da qui. Inserisci le assunzioni di base per il tuo piano. Questi dati influenzeranno tutti i calcoli successivi. Pensa a questo come alle fondamenta della tua casa finanziaria.
+                </AlertDescription>
+            </Alert>
             <GeneralAssumptions data={planData.general} setData={setGeneral} />
           </TabsContent>
 
           <TabsContent value="revenues" className="space-y-6">
+            <Alert className="mb-6">
+                <Info className="h-4 w-4" />
+                <AlertTitle>2. Previsione dei Ricavi</AlertTitle>
+                <AlertDescription>
+                    <p>Come genererà entrate la tua azienda? Definisci qui le diverse fonti di ricavo.</p>
+                    <ul className="list-disc pl-5 mt-2 space-y-1 text-xs">
+                        <li><strong>Clienti da Recuperare:</strong> Clienti persi che potresti riconquistare.</li>
+                        <li><strong>Nuovi Clienti (da Canali Strutturati):</strong> Acquisizione tramite marketing e vendite.</li>
+                        <li><strong>Nuovi Clienti (Acquisiti Direttamente):</strong> Contatti diretti, passaparola, ecc.</li>
+                    </ul>
+                </AlertDescription>
+            </Alert>
             <RecoverableClients data={planData.recoverableClients} setData={setRecoverableClients} />
             <NewClients data={planData.newClients} setData={setNewClients} />
             <DirectlyAcquiredClients data={planData.directlyAcquiredClients} setData={setDirectlyAcquiredClients} />
           </TabsContent>
 
           <TabsContent value="costs" className="space-y-6">
+            <Alert className="mb-6">
+                <Info className="h-4 w-4" />
+                <AlertTitle>3. Struttura dei Costi</AlertTitle>
+                <AlertDescription>
+                    <p>Quali sono le spese necessarie per far funzionare la tua attività? Suddividile qui.</p>
+                    <ul className="list-disc pl-5 mt-2 space-y-1 text-xs">
+                        <li><strong>Personale:</strong> Il costo del tuo team. Il "Costo Azienda" è circa 1.6 volte la Retribuzione Annua Lorda (RAL) per i dipendenti.</li>
+                        <li><strong>Costi Fissi:</strong> Spese che non cambiano con il volume delle vendite (es. affitto, software).</li>
+                        <li><strong>Costi Variabili:</strong> Spese legate direttamente ai ricavi (es. commissioni).</li>
+                        <li><strong>Investimenti:</strong> Acquisti di beni durevoli che vengono ammortizzati nel tempo.</li>
+                    </ul>
+                </AlertDescription>
+            </Alert>
             <PersonnelCosts data={planData.personnelCosts} setData={setPersonnelCosts} />
             <FixedCosts data={planData.fixedCosts} setData={setFixedCosts} />
             <VariableCosts data={planData.variableCosts} setData={setVariableCosts} />
@@ -200,10 +242,24 @@ const PlanPage = () => {
           </TabsContent>
 
           <TabsContent value="income">
+            <Alert className="mb-6">
+                <Info className="h-4 w-4" />
+                <AlertTitle>4. Conto Economico Previsionale</AlertTitle>
+                <AlertDescription>
+                    Questo è il riassunto della performance economica del tuo business. Mostra la differenza tra ricavi e costi, portando all'utile o alla perdita. Non puoi modificare direttamente questa tabella, è calcolata automaticamente.
+                </AlertDescription>
+            </Alert>
             <IncomeStatement data={financialSummary} />
           </TabsContent>
 
           <TabsContent value="cashflow">
+            <Alert className="mb-6">
+                <Info className="h-4 w-4" />
+                <AlertTitle>5. Flusso di Cassa Previsionale</AlertTitle>
+                <AlertDescription>
+                    Qui vedi l'effettivo movimento di denaro (entrate e uscite). È fondamentale per capire la liquidità e la sostenibilità finanziaria. La cassa è il re! Questa tabella è calcolata automaticamente.
+                </AlertDescription>
+            </Alert>
             <CashFlowStatement data={cashFlowSummary} />
           </TabsContent>
         </Tabs>
