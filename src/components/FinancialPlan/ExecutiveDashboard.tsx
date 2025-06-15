@@ -10,6 +10,7 @@ import { ComposedChart, XAxis, YAxis, CartesianGrid, Bar, Line } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
 import { Edit, Banknote, Landmark, AlertTriangle, ArrowDown, CalendarCheck, Percent, Target, Info, BarChart, Presentation } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { formatCurrency } from '@/lib/utils';
 
 type KpiCardProps = {
   title: string;
@@ -30,11 +31,6 @@ const KpiCard: React.FC<KpiCardProps> = ({ title, value, description, icon: Icon
     </CardContent>
   </Card>
 );
-
-const formatCurrency = (value: number | undefined) => {
-  if (value === undefined || value === null) return "N/A";
-  return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
-}
 
 const chartConfig = {
   Ricavi: {
