@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
@@ -91,6 +90,9 @@ export function PersonnelCosts({ data, setData }: Props) {
     let annualCompanyCost = 0;
     if (item.contractType === 'Dipendente') {
       annualCompanyCost = (item.annualGrossSalary || 0) * (item.companyCostCoefficient || 0);
+      if (item.bonusType === 'Importo Fisso Annuo') {
+        annualCompanyCost += (item.bonusValue || 0);
+      }
     } else if (item.contractType === 'Freelance/P.IVA' || item.contractType === 'Compenso Amministratore') {
       annualCompanyCost = (item.monthlyCost || 0) * 12;
     }
