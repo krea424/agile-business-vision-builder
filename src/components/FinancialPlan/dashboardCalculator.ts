@@ -191,7 +191,7 @@ export const calculateDashboardData = (plan: FinancialPlanState, yearlyFinancial
     ];
     const irr = calculateIRR(irrCashFlows);
 
-    // --- Monthly Breakdown for other KPIs ---
+    // --- Monthly Breakdown using ACTUAL data from yearly calculations ---
     const totalMonths = general.timeHorizon * 12;
     const monthlyData = Array.from({ length: totalMonths }, (_, i) => ({
         month: i + 1,
@@ -204,38 +204,54 @@ export const calculateDashboardData = (plan: FinancialPlanState, yearlyFinancial
     
     let cumulativeEbitda = 0;
     let cumulativeFcf = 0;
-    let endingCash = 0;
+    let runningCash = general.equityInjection + general.initialLoanAmount;
 
-    // Simplified monthly calculation based on yearly averages
+    // Use ACTUAL data from the financial and cash flow calculators
     for(let i = 0; i < totalMonths; i++) {
         const yearIndex = Math.floor(i / 12);
-        const yearFinancials = yearlyFinancials[yearIndex];
-        const yearCashFlow = yearlyCashFlow[yearIndex];
-
-        if (!yearFinancials || !yearCashFlow) continue;
-
-        const monthlyRevenue = yearFinancials.revenues / 12;
-        const monthlyEbitda = yearFinancials.ebitda / 12;
-        const monthlyFcf = (yearCashFlow.cashFlowFromOperations + yearCashFlow.cashFlowFromInvesting) / 12;
-        const monthlyFinancing = (yearCashFlow.cashFlowFromFinancing) / 12;
+        const monthInYear = i % 12;
         
-        // Adjust for first month injections
-        if (i === 0) {
-            endingCash += general.equityInjection + general.initialLoanAmount;
+        if (yearIndex < yearlyFinancials.length && yearIndex < yearlyCashFlow.length) {
+            const yearFinancials = yearlyFinancials[yearIndex];
+            const yearCashFlow = yearlyCashFlow[yearIndex];
+
+            // Distribute yearly values monthly
+            const monthlyRevenue = yearFinancials.revenues / 12;
+            const monthlyEbitda = yearFinancials.ebitda / 12;
+            const monthlyOperatingCashFlow = yearCashFlow.cashFlowFromOperations / 12;
+            const monthlyInvestingCashFlow = yearCashFlow.cashFlowFromInvesting / 12;
+            const monthlyFinancingCashFlow = yearCashFlow.cashFlowFromFinancing / 12;
+
+            // Only include equity injection and loan proceeds in the first month
+            let adjustedFinancingCashFlow = monthlyFinancingCashFlow;
+            if (i === 0) {
+                // Keep the full financing cash flow for the first month
+                adjustedFinancingCashFlow = yearCashFlow.cashFlowFromFinancing;
+            } else {
+                // Exclude equity injection and loan proceeds from other months
+                adjustedFinancingCashFlow = (yearCashFlow.loanPrincipalRepayment + yearCashFlow.dividendsPaid) / 12;
+            }
+
+            const monthlyNetCashFlow = monthlyOperatingCashFlow + monthlyInvestingCashFlow + adjustedFinancingCashFlow;
+
+            cumulativeEbitda += monthlyEbitda;
+            cumulativeFcf += monthlyOperatingCashFlow + monthlyInvestingCashFlow;
+            
+            if (i === 0) {
+                runningCash = yearCashFlow.startingCash + monthlyNetCashFlow;
+            } else {
+                runningCash += monthlyNetCashFlow;
+            }
+
+            monthlyData[i] = {
+                month: i + 1,
+                revenue: monthlyRevenue,
+                ebitda: monthlyEbitda,
+                endingCash: runningCash,
+                cumulativeEbitda: cumulativeEbitda,
+                cumulativeFcf: cumulativeFcf,
+            };
         }
-
-        cumulativeEbitda += monthlyEbitda;
-        cumulativeFcf += monthlyFcf;
-        endingCash += monthlyFcf + monthlyFinancing;
-
-        monthlyData[i] = {
-            month: i + 1,
-            revenue: monthlyRevenue,
-            ebitda: monthlyEbitda,
-            endingCash: endingCash,
-            cumulativeEbitda: cumulativeEbitda,
-            cumulativeFcf: cumulativeFcf,
-        };
     }
     
     // --- Break-Even Point ---
