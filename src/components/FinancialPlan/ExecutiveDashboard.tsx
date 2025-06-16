@@ -78,7 +78,7 @@ export const ExecutiveDashboard = ({ planData }: { planData: FinancialPlanState 
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
           <div>
             <p className="text-lg font-semibold text-primary">{planData.general.companyName}</p>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Executive Summary</h1>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Cruscotto Strategico</h1>
             <p className="mt-2 text-lg text-muted-foreground">Scenario: {planData.general.scenarioName}</p>
           </div>
           <div className="flex gap-2 mt-4 md:mt-0">
