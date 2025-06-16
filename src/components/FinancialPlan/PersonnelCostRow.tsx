@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -53,9 +52,9 @@ export function PersonnelCostRow({ item, index, onInputChange, onContractTypeCha
           type="number"
           value={item.hiringMonth || ''}
           onChange={e => {
-            const { value } = e.target;
+            const value = e.target.value;
             if (value === '') {
-              onInputChange(index, 'hiringMonth', undefined);
+              onInputChange(index, 'hiringMonth', '');
             } else {
               const intValue = parseInt(value, 10);
               if (!isNaN(intValue)) {
@@ -69,6 +68,7 @@ export function PersonnelCostRow({ item, index, onInputChange, onContractTypeCha
             }
           }}
           className="text-right"
+          placeholder="1"
         />
       </TableCell>
       <TableCell><Input type="number" value={item.endMonth || ''} onChange={e => onInputChange(index, 'endMonth', Number(e.target.value) || undefined)} className="text-right" placeholder="Opz." /></TableCell>
