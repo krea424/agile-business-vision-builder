@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -50,25 +51,27 @@ export function PersonnelCostRow({ item, index, onInputChange, onContractTypeCha
       <TableCell>
         <Input
           type="number"
-          value={item.hiringMonth || ''}
+          value={item.hiringMonth === undefined || item.hiringMonth === null ? '' : item.hiringMonth.toString()}
           onChange={e => {
-            const value = e.target.value;
+            const value = e.target.value.trim();
             if (value === '') {
-              onInputChange(index, 'hiringMonth', '');
+              onInputChange(index, 'hiringMonth', undefined);
             } else {
               const intValue = parseInt(value, 10);
-              if (!isNaN(intValue)) {
+              if (!isNaN(intValue) && intValue >= 1) {
                 onInputChange(index, 'hiringMonth', intValue);
               }
             }
           }}
-          onBlur={() => {
-            if (!item.hiringMonth || item.hiringMonth < 1) {
+          onBlur={e => {
+            const value = e.target.value.trim();
+            if (value === '' || !item.hiringMonth || item.hiringMonth < 1) {
               onInputChange(index, 'hiringMonth', 1);
             }
           }}
           className="text-right"
           placeholder="1"
+          min="1"
         />
       </TableCell>
       <TableCell><Input type="number" value={item.endMonth || ''} onChange={e => onInputChange(index, 'endMonth', Number(e.target.value) || undefined)} className="text-right" placeholder="Opz." /></TableCell>
