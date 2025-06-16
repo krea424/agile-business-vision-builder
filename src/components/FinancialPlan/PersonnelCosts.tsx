@@ -118,8 +118,8 @@ export function PersonnelCosts({ data, setData }: Props) {
               <TableRow>
                 <TableHead className="min-w-[150px]">Ruolo</TableHead>
                 <TableHead className="min-w-[200px]">Tipo Contratto</TableHead>
-                <TableHead className="text-right">Mese Avvio</TableHead>
-                <TableHead className="text-right">Mese Fine</TableHead>
+                <TableHead className="text-right min-w-[120px]">Mese Avvio</TableHead> {/* <-- CORREZIONE */}
+                <TableHead className="text-right min-w-[120px]">Mese Fine</TableHead>   {/* <-- CORREZIONE */}
                 <TableHead className="min-w-[150px] text-right">Stipendio Netto Mensile (€)</TableHead>
                 <TableHead className="min-w-[120px] text-right">Coeff. per RAL</TableHead>
                 <TableHead className="min-w-[150px] text-right">RAL / Costo Mensile (€)</TableHead>
