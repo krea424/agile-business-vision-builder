@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -51,24 +52,8 @@ export function PersonnelCostRow({ item, index, onInputChange, onContractTypeCha
       <TableCell>
         <Input
           type="number"
-          value={item.hiringMonth === undefined || item.hiringMonth === null ? '' : item.hiringMonth.toString()}
-          onChange={e => {
-            const value = e.target.value.trim();
-            if (value === '') {
-              onInputChange(index, 'hiringMonth', undefined);
-            } else {
-              const intValue = parseInt(value, 10);
-              if (!isNaN(intValue) && intValue >= 1) {
-                onInputChange(index, 'hiringMonth', intValue);
-              }
-            }
-          }}
-          onBlur={e => {
-            const value = e.target.value.trim();
-            if (value === '' || !item.hiringMonth || item.hiringMonth < 1) {
-              onInputChange(index, 'hiringMonth', 1);
-            }
-          }}
+          value={item.hiringMonth || ''}
+          onChange={e => onInputChange(index, 'hiringMonth', Number(e.target.value) || 1)}
           className="text-right"
           placeholder="1"
           min="1"
@@ -140,3 +125,4 @@ export function PersonnelCostRow({ item, index, onInputChange, onContractTypeCha
     </TableRow>
   );
 }
+
